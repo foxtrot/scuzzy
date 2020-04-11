@@ -1,0 +1,24 @@
+{
+    "guild_id": "506629366659153951",
+
+    "status_text": ".help",
+    "welcome_text": "Hi! Welcome to the Hak5 Discord Server. Please be sure to check out the #rules channel and say hello in #general!",
+    "command_key": ".",
+
+    "admin_roles": ["Admin", "Moderator"],
+    "join_role_ids": ["697929841638637778"],
+
+    "command_restrictions": [
+        { "command": "color", "mode": "white", "channels": ["698567678025138277", "698519835532984470"] },
+        { "command": "colors", "mode": "white", "channels": ["698567678025138277", "698519835532984470"] }
+    ],
+
+    "color_roles": [
+        { "color": "red", "id": "697930042491142174" },
+        { "color": "blue", "id": "697930093766639699" },
+        { "color": "green", "id": "697930441939877970" },
+        { "color": "purple", "id": "697930578485444610" },
+        { "color": "yellow", "id": "697930630247350402" },
+        { "color": "pink", "id": "697965484313935966" }
+    ]
+}
