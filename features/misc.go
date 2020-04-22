@@ -105,6 +105,8 @@ func (f *Features) handleHelp(s *discordgo.Session, m *discordgo.MessageCreate) 
 	desc += "`ftoc` - Convert Farenheit to Celsius\n"
 	desc += "`metofe` - Convert Meters to Feet\n"
 	desc += "`fetome` - Convert Feet to Meters\n"
+	desc += "`cmtoin` - Convert Centimeters to Inches\n"
+	desc += "`intocm` - Convert Inches to Centimeters\n"
 
 	if f.Auth.CheckAdminRole(m.Member) {
 		desc += "\n"
@@ -264,6 +266,60 @@ func (f *Features) handleFeetToMeters(s *discordgo.Session, m *discordgo.Message
 	msg := fmt.Sprintf("`%.1fft` is `%.1fm`", inF, feetF)
 
 	e := f.CreateDefinedEmbed("Feet to Meters", msg, "")
+	_, err = s.ChannelMessageSendEmbed(m.ChannelID, e)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (f *Features) handleCentimeterToInch(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	inS := strings.Split(m.Content, " ")
+
+	if len(inS) < 2 {
+		return errors.New("You did not specify a distance")
+	}
+	in := inS[1]
+
+	inF, err := strconv.ParseFloat(in, 2)
+	if err != nil {
+		return errors.New("You did not specify a valid number")
+	}
+
+	inch := inF / 2.54
+	inchF := float64(inch)
+
+	msg := fmt.Sprintf("`%.1fcm` is `%.1fin`", inF, inchF)
+
+	e := f.CreateDefinedEmbed("Centimeter To Inch", msg, "")
+	_, err = s.ChannelMessageSendEmbed(m.ChannelID, e)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (f *Features) handleInchToCentimeter(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	inS := strings.Split(m.Content, " ")
+
+	if len(inS) < 2 {
+		return errors.New("You did not specify a distance")
+	}
+	in := inS[1]
+
+	inF, err := strconv.ParseFloat(in, 2)
+	if err != nil {
+		return errors.New("You did not specify a valid number")
+	}
+
+	cm := inF * 2.54
+	cmF := float64(cm)
+
+	msg := fmt.Sprintf("`%.1fin` is `%.1fcm`", inF, cmF)
+
+	e := f.CreateDefinedEmbed("Inch to Centimeter", msg, "")
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, e)
 	if err != nil {
 		return err
