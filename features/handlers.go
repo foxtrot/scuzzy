@@ -100,6 +100,28 @@ func (f *Features) OnMessageCreate(s *discordgo.Session, m *discordgo.MessageCre
 			return
 		}
 		break
+	case cKey + "metofe":
+		err = f.handleMetersToFeet(s, m)
+		if err != nil {
+			eMsg := f.CreateDefinedEmbed("Error (Meters to Feet)", err.Error(), "error")
+			_, err = s.ChannelMessageSendEmbed(m.ChannelID, eMsg)
+			if err != nil {
+				log.Fatal(err.Error())
+			}
+			return
+		}
+		break
+	case cKey + "fetome":
+		err = f.handleFeetToMeters(s, m)
+		if err != nil {
+			eMsg := f.CreateDefinedEmbed("Error (Feet to Meters)", err.Error(), "error")
+			_, err = s.ChannelMessageSendEmbed(m.ChannelID, eMsg)
+			if err != nil {
+				log.Fatal(err.Error())
+			}
+			return
+		}
+		break
 	/* Moderation */
 	case cKey + "purge":
 		err = f.handlePurgeChannel(s, m)

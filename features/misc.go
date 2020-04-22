@@ -91,13 +91,20 @@ func (f *Features) handleInfo(s *discordgo.Session, m *discordgo.MessageCreate) 
 
 func (f *Features) handleHelp(s *discordgo.Session, m *discordgo.MessageCreate) error {
 	desc := "**Available Commands**\n"
+	desc += "__Misc__\n"
 	desc += "`help` - This help dialog\n"
 	desc += "`info` - Display Scuzzy info\n"
 	desc += "`md` - Display Discord markdown information\n"
+
+	desc += "\n__User Settings__\n"
 	desc += "`colors` - Available color roles\n"
 	desc += "`color` - Set an available color role\n"
+
+	desc += "\n__Conversion Helpers__\n"
 	desc += "`ctof` - Convert Celsius to Farenheit\n"
 	desc += "`ftoc` - Convert Farenheit to Celsius\n"
+	desc += "`metofe` - Convert Meters to Feet\n"
+	desc += "`fetome` - Convert Feet to Meters\n"
 
 	if f.Auth.CheckAdminRole(m.Member) {
 		desc += "\n"
@@ -203,6 +210,60 @@ func (f *Features) handleFtoC(s *discordgo.Session, m *discordgo.MessageCreate) 
 	msg := fmt.Sprintf("`%.1f°f` is `%.1f°c`", inF, farenF)
 
 	e := f.CreateDefinedEmbed("Farenheit to Celsius", msg, "")
+	_, err = s.ChannelMessageSendEmbed(m.ChannelID, e)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (f *Features) handleMetersToFeet(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	inS := strings.Split(m.Content, " ")
+
+	if len(inS) < 2 {
+		return errors.New("You did not specify a distance")
+	}
+	in := inS[1]
+
+	inF, err := strconv.ParseFloat(in, 2)
+	if err != nil {
+		return errors.New("You did not specify a valid number")
+	}
+
+	meters := inF * 3.28
+	metersF := float64(meters)
+
+	msg := fmt.Sprintf("`%.1fm` is `%.1fft`", inF, metersF)
+
+	e := f.CreateDefinedEmbed("Meters to Feet", msg, "")
+	_, err = s.ChannelMessageSendEmbed(m.ChannelID, e)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (f *Features) handleFeetToMeters(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	inS := strings.Split(m.Content, " ")
+
+	if len(inS) < 2 {
+		return errors.New("You did not specify a distance")
+	}
+	in := inS[1]
+
+	inF, err := strconv.ParseFloat(in, 2)
+	if err != nil {
+		return errors.New("You did not specify a valid number")
+	}
+
+	feet := inF / 3.28
+	feetF := float64(feet)
+
+	msg := fmt.Sprintf("`%.1fft` is `%.1fm`", inF, feetF)
+
+	e := f.CreateDefinedEmbed("Feet to Meters", msg, "")
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, e)
 	if err != nil {
 		return err
