@@ -95,6 +95,7 @@ func (f *Features) handleHelp(s *discordgo.Session, m *discordgo.MessageCreate) 
 	desc += "`help` - This help dialog\n"
 	desc += "`info` - Display Scuzzy info\n"
 	desc += "`md` - Display Discord markdown information\n"
+	desc += "`userinfo` - Display information about a user\n"
 
 	desc += "\n__User Settings__\n"
 	desc += "`colors` - Available color roles\n"
@@ -321,6 +322,92 @@ func (f *Features) handleInchToCentimeter(s *discordgo.Session, m *discordgo.Mes
 
 	e := f.CreateDefinedEmbed("Inch to Centimeter", msg, "")
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, e)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (f *Features) handleUserInfo(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	var (
+		mHandle *discordgo.Member
+		err     error
+	)
+
+	userSplit := strings.Split(m.Content, " ")
+
+	if len(userSplit) < 2 {
+		mHandle, err = s.GuildMember(f.Config.GuildID, m.Author.ID)
+		if err != nil {
+			return err
+		}
+	} else {
+		idStr := strings.Replace(userSplit[1], "<@!", "", 1)
+		idStr = strings.Replace(idStr, ">", "", 1)
+		mHandle, err = s.GuildMember(f.Config.GuildID, idStr)
+		if err != nil {
+			return err
+		}
+	}
+
+	rUserID := mHandle.User.ID
+	rUserNick := mHandle.Nick
+	rUsername := mHandle.User.Username
+	rUserDiscrim := mHandle.User.Discriminator
+	rUserAvatar := mHandle.User.AvatarURL("4096")
+	rJoinTime := mHandle.JoinedAt
+	rRoles := mHandle.Roles
+
+	if len(rUserNick) == 0 {
+		rUserNick = "No Nickname"
+	}
+
+	rJoinTimeP, err := rJoinTime.Parse()
+	if err != nil {
+		return err
+	}
+
+	rRolesTidy := ""
+	if len(rRoles) == 0 {
+		rRolesTidy = "No Roles"
+	} else {
+		for _, role := range rRoles {
+			rRolesTidy += "<@&" + role + "> "
+		}
+	}
+
+	msg := "`User ID` - " + rUserID + "\n"
+	msg += "`User Name` - " + rUsername + "\n"
+	msg += "`User Nick` - " + rUserNick + "\n"
+	msg += "`User Discrim` - #" + rUserDiscrim + "\n"
+	msg += "`User Join Time` - " + rJoinTimeP.String() + "\n"
+	msg += "`User Roles` - " + rRolesTidy + "\n"
+
+	embedData := models.CustomEmbed{
+		URL:            "",
+		Title:          "User Info (" + rUsername + ")",
+		Desc:           msg,
+		Type:           "",
+		Timestamp:      time.Now().String(),
+		Color:          0xFFA500,
+		FooterText:     "Something broken? Tell foxtrot#1337",
+		FooterImageURL: "https://cdn.discordapp.com/avatars/514163441548656641/a4ede220fea0ad8872b86f3eebc45524.png",
+		ImageURL:       "",
+		ImageH:         0,
+		ImageW:         0,
+		ThumbnailURL:   rUserAvatar,
+		ThumbnailH:     512,
+		ThumbnailW:     512,
+		ProviderURL:    "",
+		ProviderText:   "",
+		AuthorText:     "",
+		AuthorURL:      "",
+		AuthorImageURL: "",
+	}
+
+	embed := f.CreateCustomEmbed(&embedData)
+	_, err = s.ChannelMessageSendEmbed(m.ChannelID, embed)
 	if err != nil {
 		return err
 	}
