@@ -11,9 +11,14 @@ import (
 )
 
 func (f *Features) handleCat(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	if f.Auth.CheckAdminRole(m.Member) {
-		_, _ = s.ChannelMessageSend(m.ChannelID, "https://giphy.com/gifs/cat-cute-no-rCxogJBzaeZuU")
-		_ = s.ChannelMessageDelete(m.ChannelID, m.ID)
+	_, err := s.ChannelMessageSend(m.ChannelID, "https://giphy.com/gifs/cat-cute-no-rCxogJBzaeZuU")
+	if err != nil {
+		return err
+	}
+
+	err = s.ChannelMessageDelete(m.ChannelID, m.ID)
+	if err != nil {
+		return err
 	}
 
 	return nil
