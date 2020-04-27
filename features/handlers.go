@@ -18,7 +18,7 @@ func (f *Features) OnMessageCreate(s *discordgo.Session, m *discordgo.MessageCre
 	}
 
 	if m.Member == nil {
-		log.Printf("[*] User %s was ignored in direct message.", m.Author.Username)
+		log.Printf("[*] User %s was ignored in direct message.\n", m.Author.Username)
 		return
 	}
 
