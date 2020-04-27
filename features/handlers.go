@@ -9,17 +9,24 @@ import (
 func (f *Features) OnMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	var err error
 
+	cKey := f.Config.CommandKey
+	cName := strings.Split(m.Content, " ")[0]
+
 	// Ignore the bot itself
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
 
-	cKey := f.Config.CommandKey
-	cName := strings.Split(m.Content, " ")[0]
+	if m.Member == nil {
+		log.Printf("[*] User %s was ignored in direct message.", m.Author.Username)
+		return
+	}
 
 	if !strings.HasPrefix(cName, cKey) {
 		return
 	}
+
+	log.Printf("[*] User %s tried command: %s\n", m.Author.Username, cName)
 
 	switch cName {
 	/* Misc Commands */
