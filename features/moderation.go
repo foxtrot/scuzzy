@@ -31,7 +31,7 @@ func (f *Features) handlePurgeChannel(s *discordgo.Session, m *discordgo.Message
 		return err
 	}
 
-	msg := f.CreateDefinedEmbed("Purge Channel", "Purging `"+purgeSplit[1]+"` messages.", "normal")
+	msg := f.CreateDefinedEmbed("Purge Channel", "Purging `"+purgeSplit[1]+"` messages.", "", m.Author)
 	r, err := s.ChannelMessageSendEmbed(m.ChannelID, msg)
 	if err != nil {
 		return err
@@ -48,7 +48,7 @@ func (f *Features) handlePurgeChannel(s *discordgo.Session, m *discordgo.Message
 	}
 
 	err = s.ChannelMessageDelete(m.ChannelID, r.ID)
-	msg = f.CreateDefinedEmbed("Purge Channel", "Purged `"+purgeSplit[1]+"` messages!", "success")
+	msg = f.CreateDefinedEmbed("Purge Channel", "Purged `"+purgeSplit[1]+"` messages!", "success", m.Author)
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, msg)
 	if err != nil {
 		return err

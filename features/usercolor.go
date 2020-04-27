@@ -17,7 +17,7 @@ func (f *Features) listUserColors(s *discordgo.Session, m *discordgo.MessageCrea
 	}
 	msgC += "\n\nUse `" + f.Config.CommandKey + "color <color_name>` to set.\n"
 
-	msg := f.CreateDefinedEmbed("User Colors", msgC, "")
+	msg := f.CreateDefinedEmbed("User Colors", msgC, "", m.Author)
 
 	_, err := s.ChannelMessageSendEmbed(m.ChannelID, msg)
 	if err != nil {
@@ -65,7 +65,7 @@ func (f *Features) setUserColor(s *discordgo.Session, m *discordgo.MessageCreate
 	if err != nil {
 		return err
 	} else {
-		msg := f.CreateDefinedEmbed("User Color", "<@"+m.Author.ID+">: Your color has been set to <@&"+roleColorID+">!", "success")
+		msg := f.CreateDefinedEmbed("User Color", "<@"+m.Author.ID+">: Your color has been set to <@&"+roleColorID+">!", "success", m.Author)
 		_, err = s.ChannelMessageSendEmbed(m.ChannelID, msg)
 		if err != nil {
 			return err

@@ -31,7 +31,7 @@ func (f *Features) handlePing(s *discordgo.Session, m *discordgo.MessageCreate) 
 	if !f.Auth.CheckAdminRole(m.Member) {
 		return errors.New("You do not have permissions to use that command.")
 	} else {
-		msg := f.CreateDefinedEmbed("Ping", "Pong", "success")
+		msg := f.CreateDefinedEmbed("Ping", "Pong", "success", m.Author)
 		r, err = s.ChannelMessageSendEmbed(m.ChannelID, msg)
 		if err != nil {
 			return err
@@ -124,7 +124,7 @@ func (f *Features) handleHelp(s *discordgo.Session, m *discordgo.MessageCreate) 
 
 	desc += "\n\nAll commands are prefixed with `" + f.Config.CommandKey + "`\n"
 
-	msg := f.CreateDefinedEmbed("Help", desc, "")
+	msg := f.CreateDefinedEmbed("Help", desc, "", m.Author)
 
 	_, err := s.ChannelMessageSendEmbed(m.ChannelID, msg)
 	if err != nil {
@@ -152,7 +152,7 @@ func (f *Features) handleMarkdownInfo(s *discordgo.Session, m *discordgo.Message
 	desc += "Single line quotes start with `>`\n"
 	desc += "Multi line quotes start with `>>>`\n"
 
-	msg := f.CreateDefinedEmbed("Discord Markdown", desc, "")
+	msg := f.CreateDefinedEmbed("Discord Markdown", desc, "", m.Author)
 	r, err := s.ChannelMessageSendEmbed(m.ChannelID, msg)
 	if err != nil {
 		return err
@@ -190,7 +190,7 @@ func (f *Features) handleCtoF(s *discordgo.Session, m *discordgo.MessageCreate) 
 
 	msg := fmt.Sprintf("`%.1f°c` is `%.1f°f`", inF, celsF)
 
-	e := f.CreateDefinedEmbed("Celsius to Farenheit", msg, "")
+	e := f.CreateDefinedEmbed("Celsius to Farenheit", msg, "", m.Author)
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, e)
 	if err != nil {
 		return err
@@ -217,7 +217,7 @@ func (f *Features) handleFtoC(s *discordgo.Session, m *discordgo.MessageCreate) 
 
 	msg := fmt.Sprintf("`%.1f°f` is `%.1f°c`", inF, farenF)
 
-	e := f.CreateDefinedEmbed("Farenheit to Celsius", msg, "")
+	e := f.CreateDefinedEmbed("Farenheit to Celsius", msg, "", m.Author)
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, e)
 	if err != nil {
 		return err
@@ -244,7 +244,7 @@ func (f *Features) handleMetersToFeet(s *discordgo.Session, m *discordgo.Message
 
 	msg := fmt.Sprintf("`%.1fm` is `%.1fft`", inF, metersF)
 
-	e := f.CreateDefinedEmbed("Meters to Feet", msg, "")
+	e := f.CreateDefinedEmbed("Meters to Feet", msg, "", m.Author)
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, e)
 	if err != nil {
 		return err
@@ -271,7 +271,7 @@ func (f *Features) handleFeetToMeters(s *discordgo.Session, m *discordgo.Message
 
 	msg := fmt.Sprintf("`%.1fft` is `%.1fm`", inF, feetF)
 
-	e := f.CreateDefinedEmbed("Feet to Meters", msg, "")
+	e := f.CreateDefinedEmbed("Feet to Meters", msg, "", m.Author)
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, e)
 	if err != nil {
 		return err
@@ -298,7 +298,7 @@ func (f *Features) handleCentimeterToInch(s *discordgo.Session, m *discordgo.Mes
 
 	msg := fmt.Sprintf("`%.1fcm` is `%.1fin`", inF, inchF)
 
-	e := f.CreateDefinedEmbed("Centimeter To Inch", msg, "")
+	e := f.CreateDefinedEmbed("Centimeter To Inch", msg, "", m.Author)
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, e)
 	if err != nil {
 		return err
@@ -325,7 +325,7 @@ func (f *Features) handleInchToCentimeter(s *discordgo.Session, m *discordgo.Mes
 
 	msg := fmt.Sprintf("`%.1fin` is `%.1fcm`", inF, cmF)
 
-	e := f.CreateDefinedEmbed("Inch to Centimeter", msg, "")
+	e := f.CreateDefinedEmbed("Inch to Centimeter", msg, "", m.Author)
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, e)
 	if err != nil {
 		return err

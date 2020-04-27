@@ -23,7 +23,7 @@ func (f *Features) handleSetStatus(s *discordgo.Session, m *discordgo.MessageCre
 		return err
 	}
 
-	msg := f.CreateDefinedEmbed("Set Status", "Operation completed successfully.", "success")
+	msg := f.CreateDefinedEmbed("Set Status", "Operation completed successfully.", "success", m.Author)
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, msg)
 	if err != nil {
 		return err

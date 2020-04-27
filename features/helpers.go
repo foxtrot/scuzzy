@@ -4,13 +4,14 @@ import (
 	"fmt"
 	discordgo "github.com/bwmarrin/discord.go"
 	"github.com/foxtrot/scuzzy/models"
+	"time"
 )
 
 func (f *Features) PrintError(component string, error string) {
 	fmt.Printf("Error: %s: %s\n", component, error)
 }
 
-func (f *Features) CreateDefinedEmbed(title string, desc string, status string) *discordgo.MessageEmbed {
+func (f *Features) CreateDefinedEmbed(title string, desc string, status string, user *discordgo.User) *discordgo.MessageEmbed {
 	msgColor := 0x000000
 
 	switch status {
@@ -24,8 +25,13 @@ func (f *Features) CreateDefinedEmbed(title string, desc string, status string) 
 		msgColor = 0xFFA500
 	}
 
+	ftrText := "Something broken? Tell foxtrot#1337"
+	if user != nil {
+		ftrText += "\nRequested by " + user.Username + "#" + user.Discriminator
+	}
+
 	ftr := discordgo.MessageEmbedFooter{
-		Text:         "Something broken? Tell foxtrot#1337",
+		Text:         ftrText,
 		IconURL:      "https://cdn.discordapp.com/avatars/514163441548656641/a4ede220fea0ad8872b86f3eebc45524.png?size=128",
 		ProxyIconURL: "",
 	}
@@ -35,7 +41,7 @@ func (f *Features) CreateDefinedEmbed(title string, desc string, status string) 
 		Type:        "",
 		Title:       title,
 		Description: desc,
-		Timestamp:   "",
+		Timestamp:   time.Now().Format(time.RFC3339),
 		Color:       msgColor,
 		Footer:      &ftr,
 		Image:       nil,
