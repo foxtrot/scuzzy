@@ -419,3 +419,57 @@ func (f *Features) handleUserInfo(s *discordgo.Session, m *discordgo.MessageCrea
 
 	return nil
 }
+
+func (f *Features) handleServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	sID := f.Config.Guild.ID
+	sName := f.Config.Guild.Name
+	sChannels := strconv.Itoa(len(f.Config.Guild.Channels))
+	sEmojis := strconv.Itoa(len(f.Config.Guild.Emojis))
+	sMembers := strconv.Itoa(f.Config.Guild.MemberCount)
+	sRoles := strconv.Itoa(len(f.Config.Guild.Roles))
+	sRegion := f.Config.Guild.Region
+	sJoinedAt, _ := f.Config.Guild.JoinedAt.Parse()
+	sIconURL := f.Config.Guild.IconURL()
+
+	user := m.Author
+
+	desc := "**Server ID**: `" + sID + "`\n"
+	desc += "**Server Name**: `" + sName + "`\n"
+	desc += "**Server Members**: `" + sMembers + "`\n"
+	desc += "**Server Channels**: `" + sChannels + "`\n"
+	desc += "**Server Emojis**: `" + sEmojis + "`\n"
+	desc += "**Server Roles**: `" + sRoles + "`\n"
+	desc += "**Server Region**: `" + sRegion + "`\n"
+	desc += "**Server Creation**: `" + sJoinedAt.Format(time.RFC1123) + "`\n"
+
+	embedData := models.CustomEmbed{
+		URL:            "",
+		Title:          "Server Info (" + sName + ")",
+		Desc:           desc,
+		Type:           "",
+		Timestamp:      time.Now().Format(time.RFC3339),
+		Color:          0xFFA500,
+		FooterText:     "Something broken? Tell foxtrot#1337\nRequested by " + user.Username + "#" + user.Discriminator,
+		FooterImageURL: "https://cdn.discordapp.com/avatars/514163441548656641/a4ede220fea0ad8872b86f3eebc45524.png",
+		ImageURL:       "",
+		ImageH:         0,
+		ImageW:         0,
+		ThumbnailURL:   sIconURL,
+		ThumbnailH:     256,
+		ThumbnailW:     256,
+		ProviderURL:    "",
+		ProviderText:   "",
+		AuthorText:     "",
+		AuthorURL:      "",
+		AuthorImageURL: "",
+	}
+
+	msg := f.CreateCustomEmbed(&embedData)
+
+	_, err := s.ChannelMessageSendEmbed(m.ChannelID, msg)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

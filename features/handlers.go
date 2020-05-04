@@ -162,6 +162,17 @@ func (f *Features) OnMessageCreate(s *discordgo.Session, m *discordgo.MessageCre
 			return
 		}
 		break
+	case cKey + "serverinfo":
+		err = f.handleServerInfo(s, m)
+		if err != nil {
+			eMsg := f.CreateDefinedEmbed("Error (Server Info)", err.Error(), "error", m.Author)
+			_, err = s.ChannelMessageSendEmbed(m.ChannelID, eMsg)
+			if err != nil {
+				log.Fatal(err.Error())
+			}
+			return
+		}
+		break
 	/* Moderation */
 	case cKey + "purge":
 		err = f.handlePurgeChannel(s, m)
