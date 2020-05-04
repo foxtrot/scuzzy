@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func (f *Features) listUserColors(s *discordgo.Session, m *discordgo.MessageCreate) error {
+func (f *Features) handleUserColors(s *discordgo.Session, m *discordgo.MessageCreate) error {
 	if !f.Auth.CheckCommandRestrictions(m) {
 		return errors.New("This command is not allowed in this channel.")
 	}
@@ -27,7 +27,7 @@ func (f *Features) listUserColors(s *discordgo.Session, m *discordgo.MessageCrea
 	return nil
 }
 
-func (f *Features) setUserColor(s *discordgo.Session, m *discordgo.MessageCreate) error {
+func (f *Features) handleUserColor(s *discordgo.Session, m *discordgo.MessageCreate) error {
 	var err error
 
 	if !f.Auth.CheckCommandRestrictions(m) {
@@ -38,7 +38,7 @@ func (f *Features) setUserColor(s *discordgo.Session, m *discordgo.MessageCreate
 
 	userInput := strings.Split(m.Content, " ")
 	if len(userInput) < 2 {
-		err = f.listUserColors(s, m)
+		err = f.handleUserColors(s, m)
 		return err
 	}
 	roleColorName := userInput[1]
@@ -51,7 +51,7 @@ func (f *Features) setUserColor(s *discordgo.Session, m *discordgo.MessageCreate
 		}
 	}
 	if len(roleColorID) == 0 {
-		err = f.listUserColors(s, m)
+		err = f.handleUserColors(s, m)
 		return err
 	}
 

@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"fmt"
 	"github.com/foxtrot/scuzzy/auth"
 	"github.com/foxtrot/scuzzy/features"
 	"github.com/foxtrot/scuzzy/models"
@@ -45,34 +44,34 @@ func main() {
 	flag.Parse()
 
 	if len(Token) == 0 {
-		log.Fatal("Error: No Auth Token supplied.")
+		log.Fatal("[!] Error: No Auth Token supplied.")
 	}
 	if len(ConfigPath) == 0 {
-		log.Fatal("Error: No Config Path supplied.")
+		log.Fatal("[!] Error: No Config Path supplied.")
 	}
 
 	// Get Config
 	err := getConfig()
 	if err != nil {
-		log.Fatal("Error: " + err.Error())
+		log.Fatal("[!] Error: " + err.Error())
 	}
 
 	// Instantiate Bot
 	bot, err := discordgo.New("Bot " + Token)
 	if err != nil {
-		log.Fatal("Error: " + err.Error())
+		log.Fatal("[!] Error: " + err.Error())
 	}
 
 	// Open Connection
 	err = bot.Open()
 	if err != nil {
-		log.Fatal("Error: " + err.Error())
+		log.Fatal("[!] Error: " + err.Error())
 	}
 
 	// Setup Auth
 	Config.Guild, err = bot.Guild(Config.GuildID)
 	if err != nil {
-		log.Fatal("Error: " + err.Error())
+		log.Fatal("[!] Error: " + err.Error())
 	}
 	var a *auth.Auth
 	a = auth.New(&Config, Config.Guild)
@@ -85,10 +84,11 @@ func main() {
 	}
 
 	// Register Handlers
-	bot.AddHandler(f.OnMessageCreate)
-	bot.AddHandler(f.OnUserJoin)
+	f.RegisterHandlers()
+	bot.AddHandler(f.ProcessCommand)
+	bot.AddHandler(f.ProcessUserJoin)
 
-	fmt.Println("Bot Running.")
+	log.Printf("[*] Bot Running.\n")
 
 	// Set Bot Status
 	go func() {
@@ -110,14 +110,14 @@ func main() {
 		}
 		err = bot.UpdateStatusComplex(usd)
 		if err != nil {
-			log.Fatal("Error: " + err.Error())
+			log.Fatal("[!] Error: " + err.Error())
 		}
 
 		// For some reason the bot's status will regularly disappear...
 		for _ = range time.Tick(10 * time.Minute) {
 			err := bot.UpdateStatusComplex(usd)
 			if err != nil {
-				log.Fatal("Error: " + err.Error())
+				log.Fatal("[!] Error: " + err.Error())
 			}
 		}
 	}()
@@ -129,6 +129,6 @@ func main() {
 
 	err = bot.Close()
 	if err != nil {
-		log.Fatal("Error: " + err.Error())
+		log.Fatal("[!] Error: " + err.Error())
 	}
 }

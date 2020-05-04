@@ -6,222 +6,80 @@ import (
 	"strings"
 )
 
-func (f *Features) OnMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
-	var err error
+type commandHandler func(session *discordgo.Session, m *discordgo.MessageCreate) error
 
+var commandHandlers = make(map[string]commandHandler)
+
+func (f *Features) RegisterCommand(name string, handlerFunc commandHandler) {
+	log.Printf("[*] Registering Command '%s'\n", name)
+	commandHandlers[name] = handlerFunc
+}
+
+func (f *Features) RegisterHandlers() {
+	// Misc Commands
+	f.RegisterCommand("help", f.handleHelp)
+	f.RegisterCommand("info", f.handleInfo)
+	f.RegisterCommand("md", f.handleMarkdownInfo)
+	f.RegisterCommand("userinfo", f.handleUserInfo)
+	f.RegisterCommand("serverinfo", f.handleServerInfo)
+	f.RegisterCommand("no", f.handleCat)
+
+	// User Settings
+	f.RegisterCommand("colors", f.handleUserColors)
+	f.RegisterCommand("color", f.handleUserColor)
+
+	// Conversion Helpers
+	f.RegisterCommand("ctof", f.handleCtoF)
+	f.RegisterCommand("ftoc", f.handleFtoC)
+	f.RegisterCommand("metofe", f.handleMetersToFeet)
+	f.RegisterCommand("fetome", f.handleFeetToMeters)
+	f.RegisterCommand("cmtoin", f.handleCentimeterToInch)
+	f.RegisterCommand("intocm", f.handleInchToCentimeter)
+
+	// Admin Commands
+	f.RegisterCommand("ping", f.handlePing)
+	f.RegisterCommand("status", f.handleSetStatus)
+	f.RegisterCommand("purge", f.handlePurgeChannel)
+}
+
+func (f *Features) ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	cKey := f.Config.CommandKey
-	cName := strings.Split(m.Content, " ")[0]
+	cCmd := strings.Split(m.Content, " ")[0]
 
 	// Ignore the bot itself
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
 
+	// Ignore anything not starting with the command prefix
+	if !strings.HasPrefix(cCmd, cKey) {
+		return
+	}
+
+	// Ignore Direct Messages
 	if m.Member == nil {
-		log.Printf("[*] User %s was ignored in direct message.\n", m.Author.Username)
 		return
 	}
 
-	if !strings.HasPrefix(cName, cKey) {
-		return
-	}
+	cName := strings.Split(cCmd, cKey)[1]
 
-	log.Printf("[*] User %s tried command: %s\n", m.Author.Username, cName)
+	if cmdFunc, ok := commandHandlers[cName]; ok {
+		log.Printf("[*] Running command %s (Requested by %s)\n", cName, m.Author.Username)
 
-	switch cName {
-	/* Misc Commands */
-	case cKey + "help":
-		err = f.handleHelp(s, m)
+		err := cmdFunc(s, m)
 		if err != nil {
-			eMsg := f.CreateDefinedEmbed("Error (Help)", err.Error(), "error", m.Author)
+			log.Printf("[*] Command %s (Requested by %s) had error: '%s'\n", cName, m.Author.Username, err.Error())
+
+			eMsg := f.CreateDefinedEmbed("Error ("+cName+")", err.Error(), "error", m.Author)
 			_, err = s.ChannelMessageSendEmbed(m.ChannelID, eMsg)
 			if err != nil {
-				log.Fatal(err.Error())
+				log.Fatal(err)
 			}
-			return
 		}
-		break
-	case cKey + "info":
-		err = f.handleInfo(s, m)
-		if err != nil {
-			eMsg := f.CreateDefinedEmbed("Error (Info)", err.Error(), "error", m.Author)
-			_, err = s.ChannelMessageSendEmbed(m.ChannelID, eMsg)
-			if err != nil {
-				log.Fatal(err.Error())
-			}
-			return
-		}
-		break
-	case cKey + "ping":
-		err = f.handlePing(s, m)
-		if err != nil {
-			eMsg := f.CreateDefinedEmbed("Error (Ping)", err.Error(), "error", m.Author)
-			_, err = s.ChannelMessageSendEmbed(m.ChannelID, eMsg)
-			if err != nil {
-				log.Fatal(err.Error())
-			}
-			return
-		}
-		break
-	case cKey + "no":
-		err = f.handleCat(s, m)
-		if err != nil {
-			eMsg := f.CreateDefinedEmbed("Error (No)", err.Error(), "error", m.Author)
-			_, err = s.ChannelMessageSendEmbed(m.ChannelID, eMsg)
-			if err != nil {
-				log.Fatal(err.Error())
-			}
-			return
-		}
-		break
-	case cKey + "md":
-		err = f.handleMarkdownInfo(s, m)
-		if err != nil {
-			eMsg := f.CreateDefinedEmbed("Error (Markdown)", err.Error(), "error", m.Author)
-			_, err = s.ChannelMessageSendEmbed(m.ChannelID, eMsg)
-			if err != nil {
-				log.Fatal(err.Error())
-			}
-			return
-		}
-		break
-	case cKey + "ctof":
-		err = f.handleCtoF(s, m)
-		if err != nil {
-			eMsg := f.CreateDefinedEmbed("Error (CtoF)", err.Error(), "error", m.Author)
-			_, err = s.ChannelMessageSendEmbed(m.ChannelID, eMsg)
-			if err != nil {
-				log.Fatal(err.Error())
-			}
-			return
-		}
-		break
-	case cKey + "ftoc":
-		err = f.handleFtoC(s, m)
-		if err != nil {
-			eMsg := f.CreateDefinedEmbed("Error (FtoC)", err.Error(), "error", m.Author)
-			_, err = s.ChannelMessageSendEmbed(m.ChannelID, eMsg)
-			if err != nil {
-				log.Fatal(err.Error())
-			}
-			return
-		}
-		break
-	case cKey + "metofe":
-		err = f.handleMetersToFeet(s, m)
-		if err != nil {
-			eMsg := f.CreateDefinedEmbed("Error (Meters to Feet)", err.Error(), "error", m.Author)
-			_, err = s.ChannelMessageSendEmbed(m.ChannelID, eMsg)
-			if err != nil {
-				log.Fatal(err.Error())
-			}
-			return
-		}
-		break
-	case cKey + "fetome":
-		err = f.handleFeetToMeters(s, m)
-		if err != nil {
-			eMsg := f.CreateDefinedEmbed("Error (Feet to Meters)", err.Error(), "error", m.Author)
-			_, err = s.ChannelMessageSendEmbed(m.ChannelID, eMsg)
-			if err != nil {
-				log.Fatal(err.Error())
-			}
-			return
-		}
-		break
-	case cKey + "cmtoin":
-		err = f.handleCentimeterToInch(s, m)
-		if err != nil {
-			eMsg := f.CreateDefinedEmbed("Error (Meters to Feet)", err.Error(), "error", m.Author)
-			_, err = s.ChannelMessageSendEmbed(m.ChannelID, eMsg)
-			if err != nil {
-				log.Fatal(err.Error())
-			}
-			return
-		}
-		break
-	case cKey + "intocm":
-		err = f.handleInchToCentimeter(s, m)
-		if err != nil {
-			eMsg := f.CreateDefinedEmbed("Error (Feet to Meters)", err.Error(), "error", m.Author)
-			_, err = s.ChannelMessageSendEmbed(m.ChannelID, eMsg)
-			if err != nil {
-				log.Fatal(err.Error())
-			}
-			return
-		}
-		break
-	case cKey + "userinfo":
-		err = f.handleUserInfo(s, m)
-		if err != nil {
-			eMsg := f.CreateDefinedEmbed("Error (User Info)", err.Error(), "error", m.Author)
-			_, err = s.ChannelMessageSendEmbed(m.ChannelID, eMsg)
-			if err != nil {
-				log.Fatal(err.Error())
-			}
-			return
-		}
-		break
-	case cKey + "serverinfo":
-		err = f.handleServerInfo(s, m)
-		if err != nil {
-			eMsg := f.CreateDefinedEmbed("Error (Server Info)", err.Error(), "error", m.Author)
-			_, err = s.ChannelMessageSendEmbed(m.ChannelID, eMsg)
-			if err != nil {
-				log.Fatal(err.Error())
-			}
-			return
-		}
-		break
-	/* Moderation */
-	case cKey + "purge":
-		err = f.handlePurgeChannel(s, m)
-		if err != nil {
-			eMsg := f.CreateDefinedEmbed("Error (Purge)", err.Error(), "error", m.Author)
-			_, err = s.ChannelMessageSendEmbed(m.ChannelID, eMsg)
-			if err != nil {
-				log.Fatal(err.Error())
-			}
-			return
-		}
-	/* Bot Control */
-	case cKey + "status":
-		err = f.handleSetStatus(s, m)
-		if err != nil {
-			eMsg := f.CreateDefinedEmbed("Error (Status)", err.Error(), "error", m.Author)
-			_, err = s.ChannelMessageSendEmbed(m.ChannelID, eMsg)
-			if err != nil {
-				log.Fatal(err.Error())
-			}
-			return
-		}
-	/* Role Colors */
-	case cKey + "colors":
-		err = f.listUserColors(s, m)
-		if err != nil {
-			eMsg := f.CreateDefinedEmbed("Error (Colors)", err.Error(), "error", m.Author)
-			_, err = s.ChannelMessageSendEmbed(m.ChannelID, eMsg)
-			if err != nil {
-				log.Fatal(err.Error())
-			}
-			return
-		}
-		break
-	case cKey + "color":
-		err = f.setUserColor(s, m)
-		if err != nil {
-			eMsg := f.CreateDefinedEmbed("Error (Color)", err.Error(), "error", m.Author)
-			_, err = s.ChannelMessageSendEmbed(m.ChannelID, eMsg)
-			if err != nil {
-				log.Fatal(err.Error())
-			}
-			return
-		}
-		break
 	}
 }
 
-func (f *Features) OnUserJoin(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
+func (f *Features) ProcessUserJoin(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
 	userChannel, err := s.UserChannelCreate(m.User.ID)
 	if err != nil {
 		log.Print("Error (User Join): " + err.Error())

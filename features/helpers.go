@@ -1,15 +1,10 @@
 package features
 
 import (
-	"fmt"
-	discordgo "github.com/bwmarrin/discord.go"
+	"github.com/bwmarrin/discord.go"
 	"github.com/foxtrot/scuzzy/models"
 	"time"
 )
-
-func (f *Features) PrintError(component string, error string) {
-	fmt.Printf("Error: %s: %s\n", component, error)
-}
 
 func (f *Features) CreateDefinedEmbed(title string, desc string, status string, user *discordgo.User) *discordgo.MessageEmbed {
 	msgColor := 0x000000
