@@ -101,6 +101,7 @@ func (f *Features) handleHelp(s *discordgo.Session, m *discordgo.MessageCreate) 
 	desc += "`info` - Display Scuzzy info\n"
 	desc += "`md` - Display Discord markdown information\n"
 	desc += "`userinfo` - Display information about a user\n"
+	desc += "`serverinfo` - Display information about the server\n"
 
 	desc += "\n__User Settings__\n"
 	desc += "`colors` - Available color roles\n"
