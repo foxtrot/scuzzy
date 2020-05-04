@@ -336,14 +336,16 @@ func (f *Features) handleInchToCentimeter(s *discordgo.Session, m *discordgo.Mes
 
 func (f *Features) handleUserInfo(s *discordgo.Session, m *discordgo.MessageCreate) error {
 	var (
-		mHandle *discordgo.Member
-		err     error
+		mHandle   *discordgo.Member
+		requester *discordgo.Member
+		err       error
 	)
 
 	userSplit := strings.Split(m.Content, " ")
 
 	if len(userSplit) < 2 {
 		mHandle, err = s.GuildMember(f.Config.GuildID, m.Author.ID)
+		requester = mHandle
 		if err != nil {
 			return err
 		}
@@ -351,6 +353,10 @@ func (f *Features) handleUserInfo(s *discordgo.Session, m *discordgo.MessageCrea
 		idStr := strings.Replace(userSplit[1], "<@!", "", 1)
 		idStr = strings.Replace(idStr, ">", "", 1)
 		mHandle, err = s.GuildMember(f.Config.GuildID, idStr)
+		if err != nil {
+			return err
+		}
+		requester, err = s.GuildMember(f.Config.GuildID, m.Author.ID)
 		if err != nil {
 			return err
 		}
@@ -382,21 +388,21 @@ func (f *Features) handleUserInfo(s *discordgo.Session, m *discordgo.MessageCrea
 		}
 	}
 
-	msg := "`User ID` - " + rUserID + "\n"
-	msg += "`User Name` - " + rUsername + "\n"
-	msg += "`User Nick` - " + rUserNick + "\n"
-	msg += "`User Discrim` - #" + rUserDiscrim + "\n"
-	msg += "`User Join Time` - " + rJoinTimeP.String() + "\n"
-	msg += "`User Roles` - " + rRolesTidy + "\n"
+	msg := "**User ID**: `" + rUserID + "`\n"
+	msg += "**User Name**: `" + rUsername + "`\n"
+	msg += "**User Nick**: `" + rUserNick + "`\n"
+	msg += "**User Discrim**: `#" + rUserDiscrim + "`\n"
+	msg += "**User Join**:  `" + rJoinTimeP.String() + "`\n"
+	msg += "**User Roles**: " + rRolesTidy + "\n"
 
 	embedData := models.CustomEmbed{
 		URL:            "",
 		Title:          "User Info (" + rUsername + ")",
 		Desc:           msg,
 		Type:           "",
-		Timestamp:      time.Now().String(),
+		Timestamp:      time.Now().Format(time.RFC3339),
 		Color:          0xFFA500,
-		FooterText:     "Something broken? Tell foxtrot#1337",
+		FooterText:     "Something broken? Tell foxtrot#1337\nRequested by " + requester.User.Username + "#" + requester.User.Discriminator,
 		FooterImageURL: "https://cdn.discordapp.com/avatars/514163441548656641/a4ede220fea0ad8872b86f3eebc45524.png",
 		ImageURL:       "",
 		ImageH:         0,
