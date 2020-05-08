@@ -57,7 +57,7 @@ func (f *Features) handleInfo(s *discordgo.Session, m *discordgo.MessageCreate) 
 	desc += "**Language**: Go\n"
 	desc += "**Commands**: See `" + f.Config.CommandKey + "help`\n\n\n"
 
-	gm, err := s.GuildMember(f.Config.GuildID, s.State.User.ID)
+	gm, err := s.GuildMember(f.Config.Guild.ID, s.State.User.ID)
 	if err != nil {
 		return err
 	}
@@ -356,7 +356,7 @@ func (f *Features) handleUserInfo(s *discordgo.Session, m *discordgo.MessageCrea
 	userSplit := strings.Split(m.Content, " ")
 
 	if len(userSplit) < 2 {
-		mHandle, err = s.GuildMember(f.Config.GuildID, m.Author.ID)
+		mHandle, err = s.GuildMember(f.Config.Guild.ID, m.Author.ID)
 		requester = mHandle
 		if err != nil {
 			return err
@@ -364,11 +364,11 @@ func (f *Features) handleUserInfo(s *discordgo.Session, m *discordgo.MessageCrea
 	} else {
 		idStr := strings.Replace(userSplit[1], "<@!", "", 1)
 		idStr = strings.Replace(idStr, ">", "", 1)
-		mHandle, err = s.GuildMember(f.Config.GuildID, idStr)
+		mHandle, err = s.GuildMember(f.Config.Guild.ID, idStr)
 		if err != nil {
 			return err
 		}
-		requester, err = s.GuildMember(f.Config.GuildID, m.Author.ID)
+		requester, err = s.GuildMember(f.Config.Guild.ID, m.Author.ID)
 		if err != nil {
 			return err
 		}
