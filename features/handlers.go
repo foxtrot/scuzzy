@@ -40,6 +40,8 @@ func (f *Features) RegisterHandlers() {
 	f.RegisterCommand("ping", f.handlePing)
 	f.RegisterCommand("status", f.handleSetStatus)
 	f.RegisterCommand("purge", f.handlePurgeChannel)
+	f.RegisterCommand("kick", f.handleKickUser)
+	f.RegisterCommand("ban", f.handleBanUser)
 }
 
 func (f *Features) ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
