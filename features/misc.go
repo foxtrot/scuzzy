@@ -140,6 +140,15 @@ func (f *Features) handleHelp(s *discordgo.Session, m *discordgo.MessageCreate) 
 }
 
 func (f *Features) handleMarkdownInfo(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	cleanup := true
+	args := strings.Split(m.Content, " ")
+
+	if len(args) == 2 {
+		if args[1] == "stay" && f.Auth.CheckAdminRole(m.Member) {
+			cleanup = false
+		}
+	}
+
 	desc := "*Italic* text goes between `*single asterisks*`\n"
 	desc += "**Bold** text goes between `**double asterisks**`\n"
 	desc += "***Bold and Italic*** text goes between `***triple asterisks***`\n"
@@ -159,15 +168,17 @@ func (f *Features) handleMarkdownInfo(s *discordgo.Session, m *discordgo.Message
 		return err
 	}
 
-	time.Sleep(15 * time.Second)
+	if cleanup {
+		time.Sleep(15 * time.Second)
 
-	err = s.ChannelMessageDelete(m.ChannelID, r.ID)
-	if err != nil {
-		return err
-	}
-	err = s.ChannelMessageDelete(m.ChannelID, m.ID)
-	if err != nil {
-		return err
+		err = s.ChannelMessageDelete(m.ChannelID, r.ID)
+		if err != nil {
+			return err
+		}
+		err = s.ChannelMessageDelete(m.ChannelID, m.ID)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
