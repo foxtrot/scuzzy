@@ -121,6 +121,8 @@ func (f *Features) handleHelp(s *discordgo.Session, m *discordgo.MessageCreate) 
 		desc += "`ping` - Ping the bot\n"
 		desc += "`status` - Set the bot status\n"
 		desc += "`purge` - Purge channel messages\n"
+		desc += "`kick` - Kick a specified user\n"
+		desc += "`ban` - Ban a specified user\n"
 	}
 
 	desc += "\n\nAll commands are prefixed with `" + f.Config.CommandKey + "`\n"
