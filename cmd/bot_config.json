@@ -1,9 +1,10 @@
 {
+    "command_key": ".",
+
     "guild_id": "506629366659153951",
 
     "status_text": ".help",
     "welcome_text": "Hi! Welcome to the Hak5 Discord Server. Please be sure to check out the #rules channel and say hello in #general!",
-    "command_key": ".",
 
     "admin_roles": ["Admin", "Moderator"],
     "join_role_ids": ["697929841638637778"],
@@ -20,5 +21,7 @@
         { "color": "purple", "id": "697930578485444610" },
         { "color": "yellow", "id": "697930630247350402" },
         { "color": "pink", "id": "697965484313935966" }
-    ]
+    ],
+
+    "rules_text": "The Hak5 community is a place where pentesters, students, coders, enthusiasts and all-around Hak5 fans come together to help each other, inspire one another and collectively share feedback with Hak5. It's a welcoming place! We just ask that you follow these simple rules:\n\n1. BE GOOD. BE NICE. BEHAVE\nThis isn't a place for trolling – it's a place to help an encourage each other, and to provide constructive feedback. Remember, nobody was born 1337. We all started somewhere.\n\n2. DON'T SPAM\nPlease keep your posts relevant to the topic, thread or board you're posting on. Don't post random junk, troll bait or off topic ramblings – that's what YouTube is for ;)\n\n3. VIEWS EXPRESSED ARE NOT THAT OF HAK5\nWe don't prescreen any information submitted by community members. We retain the right, but not the responsibility, to edit or remove posts which violate the community guidelines. Further, Hak5 does not provide formal product support on the community forums. Hak5 may provide general product or technical information, however any information provided is offered on an \"AS IS\" basis without warranties of any kind. This disclaimer is in addition to the disclaimers and limitation of liability set forth in the Terms of Service. Similarly, community contributions such as payloads come with absolutely no warranty. You are solely responsible for the outcome of their execution.\n\nNo advertising or solicitiaion and please keep chat both ethical & legal.\n\nPlease do not post any personal order information in chat.\nIf you have questions about an order of you've placed with the Hak5 Shop please contact support via the links provided on our website https://shop.hak5.org/"
 }

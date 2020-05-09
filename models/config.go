@@ -14,11 +14,13 @@ type CommandRestriction struct {
 }
 
 type Configuration struct {
+	CommandKey string `json:"command_key"`
+
 	GuildID string `json:"guild_id"`
 
 	StatusText  string `json:"status_text"`
 	WelcomeText string `json:"welcome_text"`
-	CommandKey  string `json:"command_key"`
+	RulesText   string `json:"rules_text"`
 
 	AdminRoles  []string `json:"admin_roles"`
 	JoinRoleIDs []string `json:"join_role_ids"`

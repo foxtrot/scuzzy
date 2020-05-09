@@ -38,6 +38,7 @@ func (f *Features) RegisterHandlers() {
 
 	// Admin Commands
 	f.RegisterCommand("ping", f.handlePing)
+	f.RegisterCommand("rules", f.handleRules)
 	f.RegisterCommand("status", f.handleSetStatus)
 	f.RegisterCommand("purge", f.handlePurgeChannel)
 	f.RegisterCommand("kick", f.handleKickUser)

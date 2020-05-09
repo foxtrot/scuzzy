@@ -119,6 +119,7 @@ func (f *Features) handleHelp(s *discordgo.Session, m *discordgo.MessageCreate) 
 		desc += "\n"
 		desc += "**Admin Commands**\n"
 		desc += "`ping` - Ping the bot\n"
+		desc += "`rules` - Display the server rules\n"
 		desc += "`status` - Set the bot status\n"
 		desc += "`purge` - Purge channel messages\n"
 		desc += "`kick` - Kick a specified user\n"
@@ -134,6 +135,23 @@ func (f *Features) handleHelp(s *discordgo.Session, m *discordgo.MessageCreate) 
 		return err
 	}
 	err = s.ChannelMessageDelete(m.ChannelID, m.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (f *Features) handleRules(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	if !f.Auth.CheckAdminRole(m.Member) {
+		return errors.New("You do not have permissions to use that command.")
+	}
+
+	msg := f.Config.RulesText
+	embedTitle := "Rules (" + f.Config.Guild.Name + ")"
+	embed := f.CreateDefinedEmbed(embedTitle, msg, "success", m.Author)
+
+	_, err := s.ChannelMessageSendEmbed(m.ChannelID, embed)
 	if err != nil {
 		return err
 	}
