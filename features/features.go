@@ -1,12 +1,12 @@
 package features
 
 import (
-	"github.com/foxtrot/scuzzy/auth"
 	"github.com/foxtrot/scuzzy/models"
+	"github.com/foxtrot/scuzzy/permissions"
 )
 
 type Features struct {
-	Token  string
-	Auth   *auth.Auth
-	Config models.Configuration
+	Token       string
+	Permissions *permissions.Permissions
+	Config      models.Configuration
 }

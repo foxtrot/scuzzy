@@ -3,9 +3,9 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"github.com/foxtrot/scuzzy/auth"
 	"github.com/foxtrot/scuzzy/features"
 	"github.com/foxtrot/scuzzy/models"
+	"github.com/foxtrot/scuzzy/permissions"
 	"io/ioutil"
 	"log"
 	"os"
@@ -77,14 +77,14 @@ func main() {
 	if err != nil {
 		log.Fatal("[!] Error: " + err.Error())
 	}
-	var a *auth.Auth
-	a = auth.New(&Config, Config.Guild)
+	var p *permissions.Permissions
+	p = permissions.New(&Config, Config.Guild)
 
 	// Setup Handlers
 	f := features.Features{
-		Token:  Token,
-		Auth:   a,
-		Config: Config,
+		Token:       Token,
+		Permissions: p,
+		Config:      Config,
 	}
 
 	// Register Handlers
@@ -117,7 +117,7 @@ func main() {
 		}
 
 		// For some reason the bot's status will regularly disappear...
-		for _ = range time.Tick(10 * time.Minute) {
+		for range time.Tick(10 * time.Minute) {
 			err := bot.UpdateStatusComplex(usd)
 			if err != nil {
 				log.Fatal("[!] Error: " + err.Error())

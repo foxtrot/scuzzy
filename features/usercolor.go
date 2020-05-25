@@ -7,7 +7,7 @@ import (
 )
 
 func (f *Features) handleUserColors(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	if !f.Auth.CheckCommandRestrictions(m) {
+	if !f.Permissions.CheckCommandRestrictions(m) {
 		return errors.New("This command is not allowed in this channel.")
 	}
 
@@ -31,7 +31,7 @@ func (f *Features) handleUserColors(s *discordgo.Session, m *discordgo.MessageCr
 func (f *Features) handleUserColor(s *discordgo.Session, m *discordgo.MessageCreate) error {
 	var err error
 
-	if !f.Auth.CheckCommandRestrictions(m) {
+	if !f.Permissions.CheckCommandRestrictions(m) {
 		return errors.New("This command is not allowed in this channel.")
 	}
 

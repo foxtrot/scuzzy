@@ -23,5 +23,7 @@
         { "color": "pink", "id": "697965484313935966" }
     ],
 
+    "ignored_users": [],
+
     "logging_channel": "714369335254188053"
 }

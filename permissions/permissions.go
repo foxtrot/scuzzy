@@ -1,4 +1,4 @@
-package auth
+package permissions
 
 import (
 	"github.com/bwmarrin/discord.go"
@@ -11,7 +11,7 @@ type AdminRole struct {
 	ID   string
 }
 
-type Auth struct {
+type Permissions struct {
 	AdminRoles          []AdminRole
 	CommandRestrictions []models.CommandRestriction
 	Guild               *discordgo.Guild
@@ -19,7 +19,7 @@ type Auth struct {
 	Config *models.Configuration
 }
 
-func New(config *models.Configuration, guild *discordgo.Guild) *Auth {
+func New(config *models.Configuration, guild *discordgo.Guild) *Permissions {
 	var ars []AdminRole
 	for _, gRole := range guild.Roles {
 		for _, aRole := range config.AdminRoles {
@@ -45,7 +45,7 @@ func New(config *models.Configuration, guild *discordgo.Guild) *Auth {
 		crs = append(crs, cr)
 	}
 
-	return &Auth{
+	return &Permissions{
 		AdminRoles:          ars,
 		CommandRestrictions: crs,
 		Config:              config,
@@ -53,8 +53,8 @@ func New(config *models.Configuration, guild *discordgo.Guild) *Auth {
 	}
 }
 
-func (a *Auth) CheckAdminRole(m *discordgo.Member) bool {
-	for _, aR := range a.AdminRoles {
+func (p *Permissions) CheckAdminRole(m *discordgo.Member) bool {
+	for _, aR := range p.AdminRoles {
 		for _, mID := range m.Roles {
 			if aR.ID == mID {
 				return true
@@ -65,12 +65,22 @@ func (a *Auth) CheckAdminRole(m *discordgo.Member) bool {
 	return false
 }
 
-func (a *Auth) CheckCommandRestrictions(m *discordgo.MessageCreate) bool {
+func (p *Permissions) CheckIgnoredUser(m *discordgo.User) bool {
+	for _, iU := range p.Config.IgnoredUsers {
+		if iU == m.ID {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (p *Permissions) CheckCommandRestrictions(m *discordgo.MessageCreate) bool {
 	cName := strings.Split(m.Content, " ")[0]
-	cName = strings.Replace(cName, a.Config.CommandKey, "", 1)
+	cName = strings.Replace(cName, p.Config.CommandKey, "", 1)
 	cChanID := m.ChannelID
 
-	for _, cR := range a.CommandRestrictions {
+	for _, cR := range p.CommandRestrictions {
 		if cName == cR.Command {
 			for _, cID := range cR.Channels {
 				if cID == cChanID && cR.Mode == "white" {

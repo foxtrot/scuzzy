@@ -7,7 +7,7 @@ import (
 )
 
 func (f *Features) handleSetStatus(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	if !f.Auth.CheckAdminRole(m.Member) {
+	if !f.Permissions.CheckAdminRole(m.Member) {
 		return errors.New("You do not have permissions to use that command.")
 	}
 

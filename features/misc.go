@@ -15,7 +15,7 @@ import (
 )
 
 func (f *Features) handleSetConfig(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	if !f.Auth.CheckAdminRole(m.Member) {
+	if !f.Permissions.CheckAdminRole(m.Member) {
 		return errors.New("You do not have permissions to use that command.")
 	}
 
@@ -82,7 +82,7 @@ func (f *Features) handleSetConfig(s *discordgo.Session, m *discordgo.MessageCre
 func (f *Features) handleGetConfig(s *discordgo.Session, m *discordgo.MessageCreate) error {
 	//TODO: Handle printing of slices (check the Type, loop accordingly)
 
-	if !f.Auth.CheckAdminRole(m.Member) {
+	if !f.Permissions.CheckAdminRole(m.Member) {
 		return errors.New("You do not have permissions to use that command.")
 	}
 
@@ -208,7 +208,7 @@ func (f *Features) handlePing(s *discordgo.Session, m *discordgo.MessageCreate) 
 	var r *discordgo.Message
 	var err error
 
-	if !f.Auth.CheckAdminRole(m.Member) {
+	if !f.Permissions.CheckAdminRole(m.Member) {
 		return errors.New("You do not have permissions to use that command.")
 	} else {
 		msg := f.CreateDefinedEmbed("Ping", "Pong", "success", m.Author)
@@ -295,7 +295,7 @@ func (f *Features) handleHelp(s *discordgo.Session, m *discordgo.MessageCreate) 
 	desc += "`cmtoin` - Convert Centimeters to Inches\n"
 	desc += "`intocm` - Convert Inches to Centimeters\n"
 
-	if f.Auth.CheckAdminRole(m.Member) {
+	if f.Permissions.CheckAdminRole(m.Member) {
 		desc += "\n"
 		desc += "**Admin Commands**\n"
 		desc += "`ping` - Ping the bot\n"
@@ -304,6 +304,8 @@ func (f *Features) handleHelp(s *discordgo.Session, m *discordgo.MessageCreate) 
 		desc += "`purge` - Purge channel messages\n"
 		desc += "`kick` - Kick a specified user\n"
 		desc += "`ban` - Ban a specified user\n"
+		desc += "`ignore` - Ignore a specified user\n"
+		desc += "`unignore` - Unignore a specified user\n"
 		desc += "`setconfig` - Manage the runtime configuration\n"
 		desc += "`getconfig` - View the runtime configuration\n"
 		desc += "`reloadconfig` - Reload configuration from disk\n"
@@ -327,7 +329,7 @@ func (f *Features) handleHelp(s *discordgo.Session, m *discordgo.MessageCreate) 
 }
 
 func (f *Features) handleRules(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	if !f.Auth.CheckAdminRole(m.Member) {
+	if !f.Permissions.CheckAdminRole(m.Member) {
 		return errors.New("You do not have permissions to use that command.")
 	}
 
@@ -348,7 +350,7 @@ func (f *Features) handleMarkdownInfo(s *discordgo.Session, m *discordgo.Message
 	args := strings.Split(m.Content, " ")
 
 	if len(args) == 2 {
-		if args[1] == "stay" && f.Auth.CheckAdminRole(m.Member) {
+		if args[1] == "stay" && f.Permissions.CheckAdminRole(m.Member) {
 			cleanup = false
 		}
 	}

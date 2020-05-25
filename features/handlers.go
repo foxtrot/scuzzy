@@ -45,6 +45,8 @@ func (f *Features) RegisterHandlers() {
 	f.RegisterCommand("purge", f.handlePurgeChannel)
 	f.RegisterCommand("kick", f.handleKickUser)
 	f.RegisterCommand("ban", f.handleBanUser)
+	f.RegisterCommand("ignore", f.handleIgnoreUser)
+	f.RegisterCommand("unignore", f.handleUnIgnoreUser)
 	f.RegisterCommand("setconfig", f.handleSetConfig)
 	f.RegisterCommand("getconfig", f.handleGetConfig)
 	f.RegisterCommand("saveconfig", f.handleSaveConfig)
@@ -67,6 +69,12 @@ func (f *Features) ProcessCommand(s *discordgo.Session, m *discordgo.MessageCrea
 
 	// Ignore Direct Messages
 	if m.Member == nil {
+		return nil
+	}
+
+	// Ignore any users on the ignore list
+	if f.Permissions.CheckIgnoredUser(m.Author) {
+		log.Printf("[*] Ignoring command from ignored user.")
 		return nil
 	}
 
@@ -146,7 +154,7 @@ func (f *Features) ProcessUserJoin(s *discordgo.Session, m *discordgo.GuildMembe
 	}
 
 	for _, roleID := range f.Config.JoinRoleIDs {
-		err = s.GuildMemberRoleAdd(f.Auth.Guild.ID, m.User.ID, roleID)
+		err = s.GuildMemberRoleAdd(f.Permissions.Guild.ID, m.User.ID, roleID)
 		if err != nil {
 			log.Print("[!] Error (User Join)" + err.Error())
 			return err
