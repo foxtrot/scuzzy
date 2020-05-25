@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/bwmarrin/discord.go"
 	"log"
+	"strconv"
 	"strings"
 )
 
@@ -72,9 +73,9 @@ func (f *Features) ProcessCommand(s *discordgo.Session, m *discordgo.MessageCrea
 
 		err := cmdFunc(s, m)
 		if err != nil {
-			log.Printf("[*] Command %s (Requested by %s) had error: '%s'\n", cName, m.Author.Username, err.Error())
+			log.Printf("[!] Command %s (Requested by %s) had error: '%s'\n", cName, m.Author.Username, err.Error())
 
-			eMsg := f.CreateDefinedEmbed("[!] Error ("+cName+")", err.Error(), "error", m.Author)
+			eMsg := f.CreateDefinedEmbed("Error ("+cName+")", err.Error(), "error", m.Author)
 			_, err = s.ChannelMessageSendEmbed(m.ChannelID, eMsg)
 			if err != nil {
 				return err
@@ -101,6 +102,24 @@ func (f *Features) ProcessMessageDelete(s *discordgo.Session, m *discordgo.Messa
 	msg += "`Message` - " + msgContent + "\n"
 
 	embed := f.CreateDefinedEmbed("Deleted Message", msg, "", msgAuthor)
+	_, err := s.ChannelMessageSendEmbed(f.Config.LoggingChannel, embed)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (f *Features) ProcessMessageDeleteBulk(s *discordgo.Session, m *discordgo.MessageDeleteBulk) error {
+	msgChannelID := m.ChannelID
+
+	msg := "`Channel` - <#" + msgChannelID + ">\n"
+	msg += "Message IDs: \n"
+	for k, v := range m.Messages {
+		msg += strconv.Itoa(k) + ": `" + v + "`\n"
+	}
+
+	embed := f.CreateDefinedEmbed("Deleted Bulk Messages", msg, "", nil)
 	_, err := s.ChannelMessageSendEmbed(f.Config.LoggingChannel, embed)
 	if err != nil {
 		return err
@@ -139,32 +158,37 @@ func (f *Features) ProcessMessage(s *discordgo.Session, m interface{}) {
 		// Pass Messages to the command processor
 		err := f.ProcessCommand(s, m.(*discordgo.MessageCreate))
 		if err != nil {
-			log.Fatal("[!] Error: " + err.Error())
+			log.Println("[!] Error: " + err.Error())
 		}
 		break
 	case *discordgo.MessageDelete:
 		// Log deleted messages to the logging channel.
 		err := f.ProcessMessageDelete(s, m.(*discordgo.MessageDelete))
 		if err != nil {
-			log.Printf("[!] Error " + err.Error())
-
 			eMsg := f.CreateDefinedEmbed("Error (Message Deleted)", err.Error(), "error", nil)
 			_, err = s.ChannelMessageSendEmbed(f.Config.LoggingChannel, eMsg)
 			if err != nil {
-				log.Fatal("[!] Error " + err.Error())
+				log.Println("[!] Error " + err.Error())
+			}
+		}
+		break
+	case *discordgo.MessageDeleteBulk:
+		err := f.ProcessMessageDeleteBulk(s, m.(*discordgo.MessageDeleteBulk))
+		if err != nil {
+			eMsg := f.CreateDefinedEmbed("Error (Message Bulk Deleted)", err.Error(), "error", nil)
+			_, err = s.ChannelMessageSendEmbed(f.Config.LoggingChannel, eMsg)
+			if err != nil {
+				log.Println("[!] Error " + err.Error())
 			}
 		}
 		break
 	case *discordgo.GuildMemberAdd:
 		// Handle new member (Welcome message, etc)
-		_ = f.ProcessUserJoin(s, m.(*discordgo.GuildMemberAdd))
-		/*		if err != nil {
-				log.Fatal("[!] Error: " + err.Error())
-			}*/
+		err := f.ProcessUserJoin(s, m.(*discordgo.GuildMemberAdd))
+		if err != nil {
+			log.Println("[!] Error: " + err.Error())
+		}
 		break
-	case *discordgo.MessageDeleteBulk:
-		//TODO: Should handle these too
-		return
 	}
 
 }
