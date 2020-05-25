@@ -4,10 +4,9 @@
     "guild_id": "506629366659153951",
 
     "status_text": ".help",
-    "welcome_text": "Hi! Welcome to the Hak5 Discord Server. Please be sure to check out the #rules channel and say hello in #general!",
-
+    "welcome_text": "Hi! Welcome to the Hak5 Discord Server. Please be sure to check out the #rules channel and say hello in #general! Remember to use the correct channels and grab a nickname color from #bots!",
     "admin_roles": ["Admin", "Moderator"],
-    "join_role_ids": ["697929841638637778"],
+    "join_role_ids": [],
 
     "command_restrictions": [
         { "command": "color", "mode": "white", "channels": ["698567678025138277", "698519835532984470"] },

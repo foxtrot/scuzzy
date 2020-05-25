@@ -1,6 +1,6 @@
 package models
 
-import "github.com/bwmarrin/discord.go"
+import discordgo "github.com/bwmarrin/discord.go"
 
 type ColorRole struct {
 	Name string `json:"color"`
@@ -29,7 +29,8 @@ type Configuration struct {
 
 	ColorRoles []ColorRole `json:"color_roles"`
 
-	Guild *discordgo.Guild `json:"reserved_guild"`
-
 	LoggingChannel string `json:"logging_channel"`
+
+	Guild      *discordgo.Guild
+	ConfigPath string
 }

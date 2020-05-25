@@ -1,14 +1,194 @@
 package features
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/bwmarrin/discord.go"
 	"github.com/foxtrot/scuzzy/models"
+	"io/ioutil"
+	"os"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
 )
+
+func (f *Features) handleSetConfig(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	if !f.Auth.CheckAdminRole(m.Member) {
+		return errors.New("You do not have permissions to use that command.")
+	}
+
+	configArgs := strings.Split(m.Content, " ")
+
+	if len(configArgs) != 3 {
+		return errors.New("Invalid arguments supplied. Usage: " + f.Config.CommandKey + "setconfig <key> <value>")
+	}
+
+	configKey := configArgs[1]
+	configVal := configArgs[2]
+
+	rt := reflect.TypeOf(f.Config)
+	for i := 0; i < rt.NumField(); i++ {
+		x := rt.Field(i)
+		tagVal := strings.Split(x.Tag.Get("json"), ",")[0]
+		tagName := x.Name
+
+		if tagVal == configKey {
+			prop := reflect.ValueOf(&f.Config).Elem().FieldByName(tagName)
+
+			switch prop.Interface().(type) {
+			case string:
+				prop.SetString(configVal)
+				break
+			case int:
+				intVal, err := strconv.ParseInt(configVal, 10, 64)
+				if err != nil {
+					return err
+				}
+				prop.SetInt(intVal)
+				break
+			case float64:
+				floatVal, err := strconv.ParseFloat(configVal, 64)
+				if err != nil {
+					return err
+				}
+				prop.SetFloat(floatVal)
+				break
+			case bool:
+				boolVal, err := strconv.ParseBool(configVal)
+				if err != nil {
+					return err
+				}
+				prop.SetBool(boolVal)
+				break
+			default:
+				return errors.New("Unsupported key value type")
+			}
+
+			msgE := f.CreateDefinedEmbed("Set Configuration", "Successfully set property '"+configKey+"'!", "success", m.Author)
+			_, err := s.ChannelMessageSendEmbed(m.ChannelID, msgE)
+			if err != nil {
+				return err
+			}
+
+			return nil
+		}
+	}
+
+	return errors.New("Unknown key specified")
+}
+
+func (f *Features) handleGetConfig(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	//TODO: Handle printing of slices (check the Type, loop accordingly)
+
+	if !f.Auth.CheckAdminRole(m.Member) {
+		return errors.New("You do not have permissions to use that command.")
+	}
+
+	configArgs := strings.Split(m.Content, " ")
+	configKey := "all"
+	if len(configArgs) == 2 {
+		configKey = configArgs[1]
+	}
+
+	msg := ""
+
+	rt := reflect.TypeOf(f.Config)
+	for i := 0; i < rt.NumField(); i++ {
+		x := rt.Field(i)
+		tagVal := strings.Split(x.Tag.Get("json"), ",")[0]
+		tagName := x.Name
+		prop := reflect.ValueOf(&f.Config).Elem().FieldByName(tagName)
+
+		if configKey == "all" {
+			switch prop.Interface().(type) {
+			case string:
+				if len(prop.String()) > 256 {
+					// Truncate large values.
+					msg += "`" + tagName + "` - " + "Truncated...\n"
+				} else {
+					msg += "`" + tagName + "` - `" + prop.String() + "`\n"
+				}
+				break
+			default:
+				// Ignore non strings for now...
+				msg += "`" + tagName + "` - Skipped Value\n"
+				continue
+			}
+		} else {
+			if tagVal == configKey {
+				switch prop.Interface().(type) {
+				case string:
+					msg += "`" + tagName + "` - `" + prop.String() + "`\n"
+				default:
+					// Ignore non strings for now...
+					msg += "`" + tagName + "` - Skipped Value\n"
+				}
+
+				eMsg := f.CreateDefinedEmbed("Get Configuration", msg, "success", m.Author)
+				_, err := s.ChannelMessageSendEmbed(m.ChannelID, eMsg)
+				if err != nil {
+					return err
+				}
+
+				return nil
+			}
+		}
+	}
+
+	if msg == "" {
+		return errors.New("Unknown key specified")
+	}
+
+	eMsg := f.CreateDefinedEmbed("Get Configuration", msg, "success", m.Author)
+	_, err := s.ChannelMessageSendEmbed(m.ChannelID, eMsg)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (f *Features) handleReloadConfig(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	fBuf, err := ioutil.ReadFile(f.Config.ConfigPath)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(fBuf, &f.Config)
+	if err != nil {
+		return err
+	}
+
+	eMsg := f.CreateDefinedEmbed("Reload Configuration", "Successfully reloaded configuration from disk", "success", m.Author)
+	_, err = s.ChannelMessageSendEmbed(m.ChannelID, eMsg)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (f *Features) handleSaveConfig(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	j, err := json.Marshal(f.Config)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(f.Config.ConfigPath, j, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	eMsg := f.CreateDefinedEmbed("Save Configuration", "Saved runtime configuration successfully", "success", m.Author)
+	_, err = s.ChannelMessageSendEmbed(m.ChannelID, eMsg)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 func (f *Features) handleCat(s *discordgo.Session, m *discordgo.MessageCreate) error {
 	_, err := s.ChannelMessageSend(m.ChannelID, "https://giphy.com/gifs/cat-cute-no-rCxogJBzaeZuU")
@@ -124,6 +304,8 @@ func (f *Features) handleHelp(s *discordgo.Session, m *discordgo.MessageCreate) 
 		desc += "`purge` - Purge channel messages\n"
 		desc += "`kick` - Kick a specified user\n"
 		desc += "`ban` - Ban a specified user\n"
+		desc += "`setconfig` - Manage the runtime configuration\n"
+		desc += "`getconfig` - View the runtime configuration\n"
 	}
 
 	desc += "\n\nAll commands are prefixed with `" + f.Config.CommandKey + "`\n"

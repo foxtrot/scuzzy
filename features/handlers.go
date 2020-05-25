@@ -45,6 +45,10 @@ func (f *Features) RegisterHandlers() {
 	f.RegisterCommand("purge", f.handlePurgeChannel)
 	f.RegisterCommand("kick", f.handleKickUser)
 	f.RegisterCommand("ban", f.handleBanUser)
+	f.RegisterCommand("setconfig", f.handleSetConfig)
+	f.RegisterCommand("getconfig", f.handleGetConfig)
+	f.RegisterCommand("saveconfig", f.handleSaveConfig)
+	f.RegisterCommand("reloadconfig", f.handleReloadConfig)
 }
 
 func (f *Features) ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate) error {
@@ -186,9 +190,8 @@ func (f *Features) ProcessMessage(s *discordgo.Session, m interface{}) {
 		// Handle new member (Welcome message, etc)
 		err := f.ProcessUserJoin(s, m.(*discordgo.GuildMemberAdd))
 		if err != nil {
-			log.Println("[!] Error: " + err.Error())
+			log.Println("[!] Error (Guild Member Joined): " + err.Error())
 		}
 		break
 	}
-
 }

@@ -55,6 +55,7 @@ func main() {
 	if err != nil {
 		log.Fatal("[!] Error: " + err.Error())
 	}
+	Config.ConfigPath = ConfigPath
 
 	// Instantiate Bot
 	bot, err := discordgo.New("Bot " + Token)
