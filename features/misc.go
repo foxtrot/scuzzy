@@ -307,7 +307,7 @@ func (f *Features) handleHelp(s *discordgo.Session, m *discordgo.MessageCreate) 
 		desc += "`setconfig` - Manage the runtime configuration\n"
 		desc += "`getconfig` - View the runtime configuration\n"
 		desc += "`reloadconfig` - Reload configuration from disk\n"
-		desc += "`saveconfig` - View the runtime configuration to disk\n"
+		desc += "`saveconfig` - Save the runtime configuration to disk\n"
 	}
 
 	desc += "\n\nAll commands are prefixed with `" + f.Config.CommandKey + "`\n"
