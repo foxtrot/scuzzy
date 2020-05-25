@@ -15,7 +15,8 @@ func (f *Features) handleUserColors(s *discordgo.Session, m *discordgo.MessageCr
 	for _, v := range f.Config.ColorRoles {
 		msgC += "<@&" + v.ID + ">\n"
 	}
-	msgC += "\n\nUse `" + f.Config.CommandKey + "color <color_name>` to set.\n"
+	msgC += "\n\nUse `" + f.Config.CommandKey + "color <color>` to set.\n"
+	msgC += "Example: `" + f.Config.CommandKey + "color red`.\n"
 
 	msg := f.CreateDefinedEmbed("User Colors", msgC, "", m.Author)
 
