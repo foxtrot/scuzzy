@@ -5,6 +5,7 @@ import (
 	"github.com/bwmarrin/discord.go"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func (f *Features) handlePurgeChannel(s *discordgo.Session, m *discordgo.MessageCreate) error {
@@ -49,7 +50,15 @@ func (f *Features) handlePurgeChannel(s *discordgo.Session, m *discordgo.Message
 
 	err = s.ChannelMessageDelete(m.ChannelID, r.ID)
 	msg = f.CreateDefinedEmbed("Purge Channel", "Purged `"+purgeSplit[1]+"` messages!", "success", m.Author)
-	_, err = s.ChannelMessageSendEmbed(m.ChannelID, msg)
+	msgS, err := s.ChannelMessageSendEmbed(m.ChannelID, msg)
+
+	time.Sleep(time.Second * 10)
+
+	err = s.ChannelMessageDelete(m.ChannelID, msgS.ID)
+	if err != nil {
+		return err
+	}
+
 	if err != nil {
 		return err
 	}
