@@ -109,7 +109,7 @@ func (f *Features) handleBanUser(s *discordgo.Session, m *discordgo.MessageCreat
 	}
 
 	var (
-		mHandle   *discordgo.Member
+		mHandle   *discordgo.User
 		banReason string
 		err       error
 	)
@@ -125,17 +125,17 @@ func (f *Features) handleBanUser(s *discordgo.Session, m *discordgo.MessageCreat
 	member := args[1]
 	idStr := strings.Replace(member, "<@!", "", 1)
 	idStr = strings.Replace(idStr, ">", "", 1)
-	mHandle, err = s.GuildMember(f.Config.Guild.ID, idStr)
+	mHandle, err = s.User(idStr)
 	if err != nil {
 		return err
 	}
 
-	err = s.GuildBanCreateWithReason(f.Config.Guild.ID, mHandle.User.ID, banReason, 0)
+	err = s.GuildBanCreateWithReason(f.Config.Guild.ID, mHandle.ID, banReason, 0)
 	if err != nil {
 		return err
 	}
 
-	msg := "User `" + mHandle.User.Username + "#" + mHandle.User.Discriminator + "` was banned.\n"
+	msg := "User `" + mHandle.Username + "#" + mHandle.Discriminator + "` was banned.\n"
 	if len(banReason) > 0 {
 		msg += "Reason: `" + banReason + "`\n"
 	}
