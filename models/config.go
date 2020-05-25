@@ -30,4 +30,6 @@ type Configuration struct {
 	ColorRoles []ColorRole `json:"color_roles"`
 
 	Guild *discordgo.Guild `json:"reserved_guild"`
+
+	LoggingChannel string `json:"logging_channel"`
 }

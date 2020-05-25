@@ -62,6 +62,9 @@ func main() {
 		log.Fatal("[!] Error: " + err.Error())
 	}
 
+	// Enable Message Caching (Last 1024 Events)
+	bot.State.MaxMessageCount = 1024
+
 	// Open Connection
 	err = bot.Open()
 	if err != nil {
@@ -85,8 +88,7 @@ func main() {
 
 	// Register Handlers
 	f.RegisterHandlers()
-	bot.AddHandler(f.ProcessCommand)
-	bot.AddHandler(f.ProcessUserJoin)
+	bot.AddHandler(f.ProcessMessage)
 
 	log.Printf("[*] Bot Running.\n")
 
