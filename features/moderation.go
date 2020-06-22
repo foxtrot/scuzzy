@@ -86,6 +86,7 @@ func (f *Features) handleKickUser(s *discordgo.Session, m *discordgo.MessageCrea
 
 	member := args[1]
 	idStr := strings.Replace(member, "<@!", "", 1)
+	idStr = strings.Replace(idStr, "<@", "", 1)
 	idStr = strings.Replace(idStr, ">", "", 1)
 	mHandle, err = s.GuildMember(f.Config.Guild.ID, idStr)
 	if err != nil {
@@ -132,6 +133,7 @@ func (f *Features) handleBanUser(s *discordgo.Session, m *discordgo.MessageCreat
 
 	member := args[1]
 	idStr := strings.Replace(member, "<@!", "", 1)
+	idStr = strings.Replace(idStr, "<@", "", 1)
 	idStr = strings.Replace(idStr, ">", "", 1)
 	mHandle, err = s.User(idStr)
 	if err != nil {
@@ -169,6 +171,7 @@ func (f *Features) handleIgnoreUser(s *discordgo.Session, m *discordgo.MessageCr
 
 	member := ignArgs[1]
 	idStr := strings.Replace(member, "<@!", "", 1)
+	idStr = strings.Replace(idStr, "<@", "", 1)
 	idStr = strings.Replace(idStr, ">", "", 1)
 
 	f.Config.IgnoredUsers = append(f.Config.IgnoredUsers, idStr)
@@ -199,6 +202,7 @@ func (f *Features) handleUnIgnoreUser(s *discordgo.Session, m *discordgo.Message
 
 	member := ignArgs[1]
 	idStr := strings.Replace(member, "<@!", "", 1)
+	idStr = strings.Replace(idStr, "<@", "", 1)
 	idStr = strings.Replace(idStr, ">", "", 1)
 
 	for k, v := range f.Config.IgnoredUsers {
