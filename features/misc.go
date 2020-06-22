@@ -151,6 +151,10 @@ func (f *Features) handleGetConfig(s *discordgo.Session, m *discordgo.MessageCre
 }
 
 func (f *Features) handleReloadConfig(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	if !f.Permissions.CheckAdminRole(m.Member) {
+		return errors.New("You do not have permissions to use this command.")
+	}
+
 	fBuf, err := ioutil.ReadFile(f.Config.ConfigPath)
 	if err != nil {
 		return err
@@ -171,6 +175,10 @@ func (f *Features) handleReloadConfig(s *discordgo.Session, m *discordgo.Message
 }
 
 func (f *Features) handleSaveConfig(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	if !f.Permissions.CheckAdminRole(m.Member) {
+		return errors.New("You do not have permissions to use this command.")
+	}
+
 	j, err := json.Marshal(f.Config)
 	if err != nil {
 		return err
