@@ -8,5 +8,5 @@ import (
 type Features struct {
 	Token       string
 	Permissions *permissions.Permissions
-	Config      models.Configuration
+	Config      *models.Configuration
 }

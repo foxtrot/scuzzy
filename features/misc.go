@@ -160,10 +160,15 @@ func (f *Features) handleReloadConfig(s *discordgo.Session, m *discordgo.Message
 		return err
 	}
 
-	err = json.Unmarshal(fBuf, &f.Config)
+	conf := &models.Configuration{}
+
+	err = json.Unmarshal(fBuf, &conf)
 	if err != nil {
 		return err
 	}
+
+	f.Config = conf
+	f.Permissions.Config = conf
 
 	eMsg := f.CreateDefinedEmbed("Reload Configuration", "Successfully reloaded configuration from disk", "success", m.Author)
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, eMsg)

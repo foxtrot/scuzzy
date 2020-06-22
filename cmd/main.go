@@ -84,7 +84,7 @@ func main() {
 	f := features.Features{
 		Token:       Token,
 		Permissions: p,
-		Config:      Config,
+		Config:      &Config,
 	}
 
 	// Register Handlers
