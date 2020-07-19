@@ -581,9 +581,9 @@ func (f *Features) handleUserInfo(s *discordgo.Session, m *discordgo.MessageCrea
 			return err
 		}
 	} else {
-		idStr := strings.Replace(userSplit[1], "<@!", "", 1)
-		idStr = strings.Replace(idStr, "<@", "", 1)
-		idStr = strings.Replace(idStr, ">", "", 1)
+		idStr := strings.ReplaceAll(userSplit[1], "<@!", "")
+		idStr = strings.ReplaceAll(idStr, "<@", "")
+		idStr = strings.ReplaceAll(idStr, ">", "")
 		mHandle, err = s.GuildMember(f.Config.Guild.ID, idStr)
 		if err != nil {
 			return err
