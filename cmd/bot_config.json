@@ -23,6 +23,10 @@
         { "color": "pink", "id": "697965484313935966" }
     ],
 
+    "custom_roles": [
+        { "name":  "WiFi Pineapple Beta", "short_name": "pineapple", "id": "756469985030832158" }
+    ],
+
     "ignored_users": [],
 
     "logging_channel": "714369335254188053"

@@ -51,11 +51,14 @@ func (f *Features) CreateDefinedEmbed(title string, desc string, status string, 
 }
 
 func (f *Features) CreateCustomEmbed(embedData *models.CustomEmbed) *discordgo.MessageEmbed {
+	var typ discordgo.EmbedType
 	var ftr discordgo.MessageEmbedFooter
 	var img discordgo.MessageEmbedImage
 	var thm discordgo.MessageEmbedThumbnail
 	var prv discordgo.MessageEmbedProvider
 	var atr discordgo.MessageEmbedAuthor
+
+	typ = discordgo.EmbedType(embedData.Type)
 
 	ftr.Text = embedData.FooterText
 	ftr.IconURL = embedData.FooterImageURL
@@ -77,7 +80,7 @@ func (f *Features) CreateCustomEmbed(embedData *models.CustomEmbed) *discordgo.M
 
 	msg := discordgo.MessageEmbed{
 		URL:         embedData.URL,
-		Type:        embedData.Type,
+		Type:        typ,
 		Title:       embedData.Title,
 		Description: embedData.Desc,
 		Timestamp:   "",

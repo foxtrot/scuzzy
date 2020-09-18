@@ -29,6 +29,9 @@ func (f *Features) RegisterHandlers() {
 	// User Settings
 	f.RegisterCommand("colors", f.handleUserColors)
 	f.RegisterCommand("color", f.handleUserColor)
+	f.RegisterCommand("listroles", f.handleListCustomRoles)
+	f.RegisterCommand("joinrole", f.handleJoinCustomRole)
+	f.RegisterCommand("leaverole", f.handleLeaveCustomRole)
 
 	// Conversion Helpers
 	f.RegisterCommand("ctof", f.handleCtoF)

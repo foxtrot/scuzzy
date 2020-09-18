@@ -7,6 +7,12 @@ type ColorRole struct {
 	ID   string `json:"id"`
 }
 
+type CustomRole struct {
+	Name      string `json:"role_name"`
+	ShortName string `json:"short_name"`
+	ID        string `json:"id"`
+}
+
 type CommandRestriction struct {
 	Command  string   `json:"command"`
 	Mode     string   `json:"mode"`
@@ -27,7 +33,8 @@ type Configuration struct {
 
 	CommandRestrictions []CommandRestriction `json:"command_restrictions"`
 
-	ColorRoles []ColorRole `json:"color_roles"`
+	ColorRoles  []ColorRole  `json:"color_roles"`
+	CustomRoles []CustomRole `json:"custom_roles"`
 
 	IgnoredUsers []string `json:"ignored_users"`
 

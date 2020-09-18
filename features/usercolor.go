@@ -49,6 +49,7 @@ func (f *Features) handleUserColor(s *discordgo.Session, m *discordgo.MessageCre
 	for _, role := range f.Config.ColorRoles {
 		if role.Name == roleColorName {
 			roleColorID = role.ID
+			break
 		}
 	}
 	if len(roleColorID) == 0 {

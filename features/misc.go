@@ -299,6 +299,9 @@ func (f *Features) handleHelp(s *discordgo.Session, m *discordgo.MessageCreate) 
 	desc += "\n__User Settings__\n"
 	desc += "`colors` - Available color roles\n"
 	desc += "`color` - Set an available color role\n"
+	desc += "`listroles` - List available roles\n"
+	desc += "`joinrole` - Join an available role\n"
+	desc += "`leaverole` - Leave a joined role\n"
 
 	desc += "\n__Conversion Helpers__\n"
 	desc += "`ctof` - Convert Celsius to Farenheit\n"
