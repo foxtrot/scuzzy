@@ -1,7 +1,9 @@
 package features
 
 import (
+	"errors"
 	discordgo "github.com/bwmarrin/discord.go"
+	"github.com/foxtrot/scuzzy/models"
 	"strings"
 )
 
@@ -108,6 +110,38 @@ func (f *Features) handleLeaveCustomRole(s *discordgo.Session, m *discordgo.Mess
 	}
 
 	err = s.ChannelMessageDelete(m.ChannelID, m.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (f *Features) handleAddCustomRole(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	var err error
+
+	if !f.Permissions.CheckAdminRole(m.Member) {
+		return errors.New("You do not have permissions to use that command.")
+	}
+
+	userInput := strings.Split(m.Content, " ")
+	if len(userInput) < 3 {
+		return errors.New("Expected Arguments: short_name role_id")
+	}
+
+	shortName := userInput[1]
+	shortName = strings.ToLower(shortName)
+	roleID := userInput[2]
+
+	customRole := models.CustomRole{
+		Name:      "",
+		ShortName: shortName,
+		ID:        roleID,
+	}
+
+	f.Config.CustomRoles = append(f.Config.CustomRoles, customRole)
+
+	err = f.handleSaveConfig(s, m)
 	if err != nil {
 		return err
 	}

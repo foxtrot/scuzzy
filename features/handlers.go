@@ -56,6 +56,7 @@ func (f *Features) RegisterHandlers() {
 	f.RegisterCommand("getconfig", f.handleGetConfig)
 	f.RegisterCommand("saveconfig", f.handleSaveConfig)
 	f.RegisterCommand("reloadconfig", f.handleReloadConfig)
+	f.RegisterCommand("addrole", f.handleAddCustomRole)
 }
 
 func (f *Features) ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate) error {
