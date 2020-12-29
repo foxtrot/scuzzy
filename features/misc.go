@@ -673,12 +673,14 @@ func (f *Features) handleServerInfo(s *discordgo.Session, m *discordgo.MessageCr
 
 	chans, _ := s.GuildChannels(f.Config.GuildID)
 	sChannels := strconv.Itoa(len(chans))
-
 	sEmojis := strconv.Itoa(len(g.Emojis))
-
 	sRoles := strconv.Itoa(len(g.Roles))
 	sRegion := g.Region
-	sJoinedAt, _ := g.JoinedAt.Parse()
+
+	iID, _ := strconv.Atoi(f.Config.GuildID)
+	createdMSecs := ((iID / 4194304) + 1420070400000) / 1000
+	sCreatedAt := time.Unix(int64(createdMSecs), 0).Format(time.RFC1123)
+
 	sIconURL := g.IconURL()
 
 	user := m.Author
@@ -689,7 +691,7 @@ func (f *Features) handleServerInfo(s *discordgo.Session, m *discordgo.MessageCr
 	desc += "**Server Emojis**: `" + sEmojis + "`\n"
 	desc += "**Server Roles**: `" + sRoles + "`\n"
 	desc += "**Server Region**: `" + sRegion + "`\n"
-	desc += "**Server Creation**: `" + sJoinedAt.Format(time.RFC1123) + "`\n"
+	desc += "**Server Creation**: `" + sCreatedAt + "`\n"
 
 	embedData := models.CustomEmbed{
 		URL:            "",
