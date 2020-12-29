@@ -160,7 +160,7 @@ func (f *Features) ProcessUserJoin(s *discordgo.Session, m *discordgo.GuildMembe
 	}
 
 	for _, roleID := range f.Config.JoinRoleIDs {
-		err = s.GuildMemberRoleAdd(f.Permissions.Guild.ID, m.User.ID, roleID)
+		err = s.GuildMemberRoleAdd(f.Config.GuildID, m.User.ID, roleID)
 		if err != nil {
 			log.Print("[!] Error (User Join)" + err.Error())
 			return err

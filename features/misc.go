@@ -250,7 +250,7 @@ func (f *Features) handleInfo(s *discordgo.Session, m *discordgo.MessageCreate) 
 	desc += "**Language**: Go\n"
 	desc += "**Commands**: See `" + f.Config.CommandKey + "help`\n\n\n"
 
-	gm, err := s.GuildMember(f.Config.Guild.ID, s.State.User.ID)
+	gm, err := s.GuildMember(f.Config.GuildID, s.State.User.ID)
 	if err != nil {
 		return err
 	}
@@ -351,7 +351,7 @@ func (f *Features) handleRules(s *discordgo.Session, m *discordgo.MessageCreate)
 	}
 
 	msg := f.Config.RulesText
-	embedTitle := "Rules (" + f.Config.Guild.Name + ")"
+	embedTitle := "Rules (" + f.Config.GuildName + ")"
 	embed := f.CreateDefinedEmbed(embedTitle, msg, "success", m.Author)
 
 	_, err := s.ChannelMessageSendEmbed(m.ChannelID, embed)
@@ -579,7 +579,7 @@ func (f *Features) handleUserInfo(s *discordgo.Session, m *discordgo.MessageCrea
 	userSplit := strings.Split(m.Content, " ")
 
 	if len(userSplit) < 2 {
-		mHandle, err = s.GuildMember(f.Config.Guild.ID, m.Author.ID)
+		mHandle, err = s.GuildMember(f.Config.GuildID, m.Author.ID)
 		requester = mHandle
 		if err != nil {
 			return err
@@ -588,11 +588,11 @@ func (f *Features) handleUserInfo(s *discordgo.Session, m *discordgo.MessageCrea
 		idStr := strings.ReplaceAll(userSplit[1], "<@!", "")
 		idStr = strings.ReplaceAll(idStr, "<@", "")
 		idStr = strings.ReplaceAll(idStr, ">", "")
-		mHandle, err = s.GuildMember(f.Config.Guild.ID, idStr)
+		mHandle, err = s.GuildMember(f.Config.GuildID, idStr)
 		if err != nil {
 			return err
 		}
-		requester, err = s.GuildMember(f.Config.Guild.ID, m.Author.ID)
+		requester, err = s.GuildMember(f.Config.GuildID, m.Author.ID)
 		if err != nil {
 			return err
 		}
@@ -663,21 +663,28 @@ func (f *Features) handleUserInfo(s *discordgo.Session, m *discordgo.MessageCrea
 }
 
 func (f *Features) handleServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	sID := f.Config.Guild.ID
-	sName := f.Config.Guild.Name
-	sChannels := strconv.Itoa(len(f.Config.Guild.Channels))
-	sEmojis := strconv.Itoa(len(f.Config.Guild.Emojis))
-	sMembers := strconv.Itoa(f.Config.Guild.MemberCount)
-	sRoles := strconv.Itoa(len(f.Config.Guild.Roles))
-	sRegion := f.Config.Guild.Region
-	sJoinedAt, _ := f.Config.Guild.JoinedAt.Parse()
-	sIconURL := f.Config.Guild.IconURL()
+	g, err := s.Guild(f.Config.GuildID)
+	if err != nil {
+		return err
+	}
+
+	sID := f.Config.GuildID
+	sName := f.Config.GuildName
+
+	chans, _ := s.GuildChannels(f.Config.GuildID)
+	sChannels := strconv.Itoa(len(chans))
+
+	sEmojis := strconv.Itoa(len(g.Emojis))
+
+	sRoles := strconv.Itoa(len(g.Roles))
+	sRegion := g.Region
+	sJoinedAt, _ := g.JoinedAt.Parse()
+	sIconURL := g.IconURL()
 
 	user := m.Author
 
 	desc := "**Server ID**: `" + sID + "`\n"
 	desc += "**Server Name**: `" + sName + "`\n"
-	desc += "**Server Members**: `" + sMembers + "`\n"
 	desc += "**Server Channels**: `" + sChannels + "`\n"
 	desc += "**Server Emojis**: `" + sEmojis + "`\n"
 	desc += "**Server Roles**: `" + sRoles + "`\n"
@@ -708,7 +715,7 @@ func (f *Features) handleServerInfo(s *discordgo.Session, m *discordgo.MessageCr
 
 	msg := f.CreateCustomEmbed(&embedData)
 
-	_, err := s.ChannelMessageSendEmbed(m.ChannelID, msg)
+	_, err = s.ChannelMessageSendEmbed(m.ChannelID, msg)
 	if err != nil {
 		return err
 	}

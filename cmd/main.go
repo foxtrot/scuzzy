@@ -65,6 +65,8 @@ func main() {
 
 	// Enable Message Caching (Last 1024 Events)
 	bot.State.MaxMessageCount = 1024
+	bot.State.TrackChannels = true
+	bot.State.TrackMembers = true
 
 	// Open Connection
 	err = bot.Open()
@@ -73,12 +75,14 @@ func main() {
 	}
 
 	// Setup Auth
-	Config.Guild, err = bot.Guild(Config.GuildID)
+	g, err := bot.Guild(Config.GuildID)
 	if err != nil {
 		log.Fatal("[!] Error: " + err.Error())
 	}
 	var p *permissions.Permissions
-	p = permissions.New(&Config, Config.Guild)
+	p = permissions.New(&Config, g)
+
+	Config.GuildName = g.Name
 
 	// Setup Handlers
 	f := features.Features{

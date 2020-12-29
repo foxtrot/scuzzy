@@ -14,7 +14,6 @@ type AdminRole struct {
 type Permissions struct {
 	AdminRoles          []AdminRole
 	CommandRestrictions []models.CommandRestriction
-	Guild               *discordgo.Guild
 
 	Config *models.Configuration
 }
@@ -49,7 +48,6 @@ func New(config *models.Configuration, guild *discordgo.Guild) *Permissions {
 		AdminRoles:          ars,
 		CommandRestrictions: crs,
 		Config:              config,
-		Guild:               guild,
 	}
 }
 

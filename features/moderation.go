@@ -88,12 +88,12 @@ func (f *Features) handleKickUser(s *discordgo.Session, m *discordgo.MessageCrea
 	idStr := strings.ReplaceAll(member, "<@!", "")
 	idStr = strings.ReplaceAll(idStr, "<@", "")
 	idStr = strings.ReplaceAll(idStr, ">", "")
-	mHandle, err = s.GuildMember(f.Config.Guild.ID, idStr)
+	mHandle, err = s.GuildMember(f.Config.GuildID, idStr)
 	if err != nil {
 		return err
 	}
 
-	err = s.GuildMemberDeleteWithReason(f.Config.Guild.ID, mHandle.User.ID, kickReason)
+	err = s.GuildMemberDeleteWithReason(f.Config.GuildID, mHandle.User.ID, kickReason)
 	if err != nil {
 		return err
 	}
@@ -140,7 +140,7 @@ func (f *Features) handleBanUser(s *discordgo.Session, m *discordgo.MessageCreat
 		return err
 	}
 
-	err = s.GuildBanCreateWithReason(f.Config.Guild.ID, mHandle.ID, banReason, 0)
+	err = s.GuildBanCreateWithReason(f.Config.GuildID, mHandle.ID, banReason, 0)
 	if err != nil {
 		return err
 	}

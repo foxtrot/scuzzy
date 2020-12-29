@@ -1,7 +1,5 @@
 package models
 
-import discordgo "github.com/bwmarrin/discord.go"
-
 type ColorRole struct {
 	Name string `json:"color"`
 	ID   string `json:"id"`
@@ -22,7 +20,8 @@ type CommandRestriction struct {
 type Configuration struct {
 	CommandKey string `json:"command_key"`
 
-	GuildID string `json:"guild_id"`
+	GuildID   string `json:"guild_id"`
+	GuildName string `json:"guild_name"`
 
 	StatusText  string `json:"status_text"`
 	WelcomeText string `json:"welcome_text"`
@@ -40,6 +39,5 @@ type Configuration struct {
 
 	LoggingChannel string `json:"logging_channel"`
 
-	Guild      *discordgo.Guild
 	ConfigPath string
 }
