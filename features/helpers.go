@@ -20,9 +20,9 @@ func (f *Features) CreateDefinedEmbed(title string, desc string, status string, 
 		msgColor = 0xFFA500
 	}
 
-	ftrText := "Something broken? Tell foxtrot#1337"
+	ftrText := ""
 	if user != nil {
-		ftrText += "\nRequested by " + user.Username + "#" + user.Discriminator
+		ftrText += "Requested by " + user.Username + "#" + user.Discriminator
 	}
 
 	ftr := discordgo.MessageEmbedFooter{
