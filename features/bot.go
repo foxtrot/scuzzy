@@ -2,7 +2,7 @@ package features
 
 import (
 	"errors"
-	discordgo "github.com/bwmarrin/discord.go"
+	discordgo "github.com/bwmarrin/discordgo"
 	"log"
 	"os"
 	"strings"

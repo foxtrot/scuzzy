@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/bwmarrin/discord.go"
+	"github.com/bwmarrin/discordgo"
 	"github.com/foxtrot/scuzzy/models"
 	"io/ioutil"
 	"os"

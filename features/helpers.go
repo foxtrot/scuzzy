@@ -1,7 +1,7 @@
 package features
 
 import (
-	"github.com/bwmarrin/discord.go"
+	"github.com/bwmarrin/discordgo"
 	"github.com/foxtrot/scuzzy/models"
 	"time"
 )

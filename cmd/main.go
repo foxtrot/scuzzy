@@ -13,7 +13,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/bwmarrin/discord.go"
+	"github.com/bwmarrin/discordgo"
 )
 
 // Core Bot Properties
