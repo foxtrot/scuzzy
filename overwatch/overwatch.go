@@ -13,6 +13,7 @@ type UserMessageStat struct {
 	MessagesLastHour       uint64
 	MessagesLastFiveMins   uint64
 	MessagesLastThirtySecs uint64
+	Kicks                  int
 }
 
 type Overwatch struct {
@@ -38,12 +39,8 @@ func (o *Overwatch) handleUserStat(s *discordgo.Session, m *discordgo.MessageCre
 	user, ok := o.UserMessages[userID]
 	if !ok {
 		o.UserMessages[userID] = &UserMessageStat{
-			UserID:                 userID,
-			Username:               m.Author.Username,
-			MessagesLastDay:        0,
-			MessagesLastHour:       0,
-			MessagesLastFiveMins:   0,
-			MessagesLastThirtySecs: 0,
+			UserID:   userID,
+			Username: m.Author.Username,
 		}
 		user = o.UserMessages[userID]
 	}
@@ -58,15 +55,21 @@ func (o *Overwatch) handleUserStat(s *discordgo.Session, m *discordgo.MessageCre
 
 // this is fucking amazing code
 func (o *Overwatch) Run() {
-	// Five second loop
+	// State of the art anti-spam loop
 	go func() {
 		for range time.Tick(5 * time.Second) {
 			for _, user := range o.UserMessages {
-				log.Printf("User: %+v", user)
-				// load the threshold from the config file
+				// load the threshold from the config file, dipshit
 				if user.MessagesLastThirtySecs > 10 {
 					// Set slow mode, kick user? add kick count?
-					log.Printf("[*] User %s (%s) has triggered the message threshold.", user.Username, user.UserID)
+					if user.Kicks > 2 {
+						// ban that sucker
+						log.Printf("[*] User %s (%s) was banned due to previous spam-related kicks", user.Username, user.UserID)
+					} else {
+						user.Kicks++
+						// kick that sucker
+						log.Printf("[*] User %s (%s) has triggered the message threshold.", user.Username, user.UserID)
+					}
 				}
 			}
 		}
@@ -74,31 +77,28 @@ func (o *Overwatch) Run() {
 
 	// Clear Counters
 	go func() {
-		for range time.Tick(30 * time.Second) {
-			log.Printf("[*] Resetting all users 10 second message counters")
+		for range time.Tick(24 * time.Hour) {
 			for _, user := range o.UserMessages {
-				user.MessagesLastThirtySecs = 0
+				if user.MessagesLastDay == 0 {
+					delete(o.UserMessages, user.UserID)
+				} else {
+					user.MessagesLastDay = 0
+				}
 			}
 		}
-
-		for range time.Tick(5 * time.Minute) {
-			log.Printf("[*] Resetting all users 5 minute message counters")
-			for _, user := range o.UserMessages {
-				user.MessagesLastFiveMins = 0
-			}
-		}
-
 		for range time.Tick(1 * time.Hour) {
-			log.Printf("[*] Resetting all users 60 minute message counters")
 			for _, user := range o.UserMessages {
 				user.MessagesLastHour = 0
 			}
 		}
-
-		for range time.Tick(24 * time.Hour) {
-			log.Println("[*] Resetting all users 1 day message counters")
+		for range time.Tick(5 * time.Minute) {
 			for _, user := range o.UserMessages {
-				user.MessagesLastDay = 0
+				user.MessagesLastFiveMins = 0
+			}
+		}
+		for range time.Tick(30 * time.Second) {
+			for _, user := range o.UserMessages {
+				user.MessagesLastThirtySecs = 0
 			}
 		}
 	}()
