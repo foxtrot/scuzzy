@@ -1,0 +1,18 @@
+diff -Nurx '.*' discord.go/structs.go discordgo/structs.go
+--- discord.go/structs.go	2021-05-28 16:13:27.712814231 +0000
++++ discordgo/structs.go	2021-05-28 16:29:42.482943595 +0000
+@@ -310,12 +310,12 @@
+ 	Name                 string                 `json:"name,omitempty"`
+ 	Topic                string                 `json:"topic,omitempty"`
+ 	NSFW                 bool                   `json:"nsfw,omitempty"`
+-	Position             int                    `json:"position"`
++	Position             int                    `json:"position,omitempty"`
+ 	Bitrate              int                    `json:"bitrate,omitempty"`
+ 	UserLimit            int                    `json:"user_limit,omitempty"`
+ 	PermissionOverwrites []*PermissionOverwrite `json:"permission_overwrites,omitempty"`
+ 	ParentID             string                 `json:"parent_id,omitempty"`
+-	RateLimitPerUser     int                    `json:"rate_limit_per_user,omitempty"`
++	RateLimitPerUser     int                    `json:"rate_limit_per_user"`
+ }
+ 
+ // A ChannelFollow holds data returned after following a news channel
