@@ -68,11 +68,6 @@ func (f *Features) RegisterHandlers() {
 	f.RegisterCommand("saveconfig", "Save Configuration to Disk", true, f.handleSaveConfig)
 	f.RegisterCommand("reloadconfig", "Reload Configuration", true, f.handleReloadConfig)
 	f.RegisterCommand("addrole", "Add a joinable role", true, f.handleAddCustomRole)
-
-	sort.Slice(f.ScuzzyCommandsByIndex, func(i, j int) bool {
-		return f.ScuzzyCommandsByIndex[i].Index > f.ScuzzyCommandsByIndex[j].Index
-	})
-
 }
 
 func (f *Features) ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate) error {

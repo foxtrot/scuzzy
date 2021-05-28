@@ -4,14 +4,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/bwmarrin/discordgo"
-	"github.com/foxtrot/scuzzy/models"
 	"io/ioutil"
 	"os"
 	"reflect"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/bwmarrin/discordgo"
+	"github.com/foxtrot/scuzzy/models"
 )
 
 func (f *Features) handleSetConfig(s *discordgo.Session, m *discordgo.MessageCreate) error {
@@ -288,8 +290,20 @@ func (f *Features) handleInfo(s *discordgo.Session, m *discordgo.MessageCreate) 
 }
 
 func (f *Features) handleHelp(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	keys := make([]int, 0, len(f.ScuzzyCommands))
+	for _, cmd := range f.ScuzzyCommands {
+		keys = append(keys, cmd.Index)
+	}
+	sort.Ints(keys)
+
+	for _, k := range keys {
+		fmt.Println(k, f.ScuzzyCommandsByIndex[k])
+	}
+
 	desc := "**Available Commands**\n"
-	for _, command := range f.ScuzzyCommandsByIndex {
+	for _, k := range keys {
+		command := f.ScuzzyCommandsByIndex[k]
+
 		if !command.AdminOnly && command.Description != "" {
 			desc += "`" + command.Name + "` - " + command.Description + "\n"
 		}
@@ -298,7 +312,9 @@ func (f *Features) handleHelp(s *discordgo.Session, m *discordgo.MessageCreate) 
 	if f.Permissions.CheckAdminRole(m.Member) {
 		desc += "\n"
 		desc += "**Admin Commands**\n"
-		for _, command := range f.ScuzzyCommandsByIndex {
+		for _, k := range keys {
+			command := f.ScuzzyCommandsByIndex[k]
+
 			if command.AdminOnly {
 				desc += "`" + command.Name + "` - " + command.Description + "\n"
 			}
