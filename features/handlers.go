@@ -3,7 +3,6 @@ package features
 import (
 	"errors"
 	"log"
-	"sort"
 	"strconv"
 	"strings"
 
