@@ -101,19 +101,8 @@ func main() {
 	go func() {
 		usd := discordgo.UpdateStatusData{
 			IdleSince: nil,
-			Game: &discordgo.Game{
-				Name:          Config.StatusText,
-				Type:          0,
-				URL:           "",
-				Details:       "",
-				State:         "",
-				TimeStamps:    discordgo.TimeStamps{},
-				Assets:        discordgo.Assets{},
-				ApplicationID: "",
-				Instance:      -1,
-			},
-			AFK:    false,
-			Status: "online",
+			AFK:       false,
+			Status:    "online",
 		}
 		err = bot.UpdateStatusComplex(usd)
 		if err != nil {

@@ -8,6 +8,49 @@ import (
 	"time"
 )
 
+func (f *Features) handleSetSlowmode(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	if !f.Permissions.CheckAdminRole(m.Member) {
+		return errors.New("You do not have permissions to use that command.")
+	}
+
+	slowmodeSplit := strings.Split(m.Content, " ")
+	if len(slowmodeSplit) < 2 {
+		return errors.New("You must supply at least an amount of time")
+	}
+
+	// slowmodeTime = slowmodeSplit[1]
+
+	if len(slowmodeSplit) == 3 {
+		if slowmodeSplit[2] == "all" {
+			channels, err := s.GuildChannels(f.Config.GuildID)
+			if err != nil {
+				return err
+			}
+
+			for _, channel := range channels {
+				s.ChannelEditComplex(channel.ID, &discordgo.ChannelEdit{
+					RateLimitPerUser: 10,
+				})
+			}
+		}
+	}
+
+	_, err := s.ChannelEditComplex(m.ChannelID, &discordgo.ChannelEdit{
+		RateLimitPerUser: 10,
+	})
+	if err != nil {
+		return err
+	}
+
+	msg := f.CreateDefinedEmbed("Slow Mode", "Setting Slow Mode", "success", m.Author)
+	_, err = s.ChannelMessageSendEmbed(m.ChannelID, msg)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (f *Features) handlePurgeChannel(s *discordgo.Session, m *discordgo.MessageCreate) error {
 	if !f.Permissions.CheckAdminRole(m.Member) {
 		return errors.New("You do not have permissions to use that command.")

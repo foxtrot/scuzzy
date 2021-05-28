@@ -21,7 +21,7 @@ func (f *Features) handleSetStatus(s *discordgo.Session, m *discordgo.MessageCre
 
 	st := stSplit[1]
 
-	err := s.UpdateStatus(0, st)
+	err := s.UpdateGameStatus(0, st)
 	if err != nil {
 		return err
 	}
