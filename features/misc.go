@@ -289,7 +289,7 @@ func (f *Features) handleInfo(s *discordgo.Session, m *discordgo.MessageCreate) 
 
 func (f *Features) handleHelp(s *discordgo.Session, m *discordgo.MessageCreate) error {
 	desc := "**Available Commands**\n"
-	for _, command := range f.ScuzzyCommands {
+	for _, command := range f.ScuzzyCommandsByIndex {
 		if !command.AdminOnly && command.Description != "" {
 			desc += "`" + command.Name + "` - " + command.Description + "\n"
 		}
@@ -298,7 +298,7 @@ func (f *Features) handleHelp(s *discordgo.Session, m *discordgo.MessageCreate) 
 	if f.Permissions.CheckAdminRole(m.Member) {
 		desc += "\n"
 		desc += "**Admin Commands**\n"
-		for _, command := range f.ScuzzyCommands {
+		for _, command := range f.ScuzzyCommandsByIndex {
 			if command.AdminOnly {
 				desc += "`" + command.Name + "` - " + command.Description + "\n"
 			}

@@ -3,6 +3,7 @@ package features
 import (
 	"errors"
 	"log"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -12,16 +13,19 @@ import (
 func (f *Features) RegisterCommand(name string, description string, adminonly bool, handler ScuzzyHandler) {
 	log.Printf("[*] Registering Command '%s'\n", name)
 	c := ScuzzyCommand{
+		Index:       len(f.ScuzzyCommands) + 1,
 		Name:        name,
 		Description: description,
 		AdminOnly:   adminonly,
 		Handler:     handler,
 	}
 	f.ScuzzyCommands[name] = c
+	f.ScuzzyCommandsByIndex[c.Index] = c
 }
 
 func (f *Features) RegisterHandlers() {
 	f.ScuzzyCommands = make(map[string]ScuzzyCommand)
+	f.ScuzzyCommandsByIndex = make(map[int]ScuzzyCommand)
 
 	// Misc Commands
 	f.RegisterCommand("help", "Show Help Text", false, f.handleHelp)
@@ -64,6 +68,11 @@ func (f *Features) RegisterHandlers() {
 	f.RegisterCommand("saveconfig", "Save Configuration to Disk", true, f.handleSaveConfig)
 	f.RegisterCommand("reloadconfig", "Reload Configuration", true, f.handleReloadConfig)
 	f.RegisterCommand("addrole", "Add a joinable role", true, f.handleAddCustomRole)
+
+	sort.Slice(f.ScuzzyCommandsByIndex, func(i, j int) bool {
+		return f.ScuzzyCommandsByIndex[i].Index > f.ScuzzyCommandsByIndex[j].Index
+	})
+
 }
 
 func (f *Features) ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate) error {
@@ -95,7 +104,8 @@ func (f *Features) ProcessCommand(s *discordgo.Session, m *discordgo.MessageCrea
 
 	if cmd, ok := f.ScuzzyCommands[cName]; ok {
 		if cmd.AdminOnly && !f.Permissions.CheckAdminRole(m.Member) {
-			return errors.New("You do not have permissions to use this command.")
+			log.Printf("[*] User %s tried to run admin command %s\n", m.Author.Username, cName)
+			return nil
 		}
 
 		log.Printf("[*] Running command %s (Requested by %s)\n", cName, m.Author.Username)
