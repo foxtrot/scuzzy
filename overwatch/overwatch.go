@@ -33,7 +33,7 @@ func (o *Overwatch) ProcessMessage(s *discordgo.Session, m interface{}) {
 }
 
 func (o *Overwatch) handleUserStat(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	userID := m.Member.User.ID
+	userID := m.Author.ID
 	user, ok := o.UserMessages[userID]
 	if !ok {
 		o.UserMessages[userID] = UserMessageStat{
