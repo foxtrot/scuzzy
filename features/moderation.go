@@ -18,7 +18,11 @@ func (f *Features) handleSetSlowmode(s *discordgo.Session, m *discordgo.MessageC
 		return errors.New("You must supply at least an amount of time")
 	}
 
-	// slowmodeTime = slowmodeSplit[1]
+	slowmodeTimeStr := slowmodeSplit[1]
+	slowModeTime, err := strconv.Atoi(slowmodeTimeStr)
+	if err != nil {
+		return err
+	}
 
 	if len(slowmodeSplit) == 3 {
 		if slowmodeSplit[2] == "all" {
@@ -29,21 +33,59 @@ func (f *Features) handleSetSlowmode(s *discordgo.Session, m *discordgo.MessageC
 
 			for _, channel := range channels {
 				s.ChannelEditComplex(channel.ID, &discordgo.ChannelEdit{
-					RateLimitPerUser: 10,
+					RateLimitPerUser: slowModeTime,
 				})
 			}
 		}
+	} else {
+		_, err := s.ChannelEditComplex(m.ChannelID, &discordgo.ChannelEdit{
+			RateLimitPerUser: slowModeTime,
+		})
+		if err != nil {
+			return err
+		}
 	}
 
-	_, err := s.ChannelEditComplex(m.ChannelID, &discordgo.ChannelEdit{
-		RateLimitPerUser: 10,
-	})
+	msg := f.CreateDefinedEmbed("Slow Mode", "Successfully set Slow Mode to `"+slowmodeTimeStr+"`.", "success", m.Author)
+	_, err = s.ChannelMessageSendEmbed(m.ChannelID, msg)
 	if err != nil {
 		return err
 	}
 
-	msg := f.CreateDefinedEmbed("Slow Mode", "Setting Slow Mode", "success", m.Author)
-	_, err = s.ChannelMessageSendEmbed(m.ChannelID, msg)
+	return nil
+}
+
+func (f *Features) handleUnsetSlowmode(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	if !f.Permissions.CheckAdminRole(m.Member) {
+		return errors.New("You do not have permissions to use that command.")
+	}
+
+	slowmodeSplit := strings.Split(m.Content, " ")
+
+	if len(slowmodeSplit) == 2 {
+		if slowmodeSplit[1] == "all" {
+			channels, err := s.GuildChannels(f.Config.GuildID)
+			if err != nil {
+				return err
+			}
+
+			for _, channel := range channels {
+				s.ChannelEditComplex(channel.ID, &discordgo.ChannelEdit{
+					RateLimitPerUser: 0,
+				})
+			}
+		}
+	} else {
+		_, err := s.ChannelEditComplex(m.ChannelID, &discordgo.ChannelEdit{
+			RateLimitPerUser: 0,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	msg := f.CreateDefinedEmbed("Slow Mode", "Successfully unset Slow Mode", "success", m.Author)
+	_, err := s.ChannelMessageSendEmbed(m.ChannelID, msg)
 	if err != nil {
 		return err
 	}
