@@ -33,9 +33,14 @@ func (o *Overwatch) ProcessMessage(s *discordgo.Session, m interface{}) {
 }
 
 func (o *Overwatch) handleUserStat(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	for _, user := range o.UserMessages {
+		log.Printf("User: %+v\n", user)
+	}
+
 	userID := m.Author.ID
 	user, ok := o.UserMessages[userID]
 	if !ok {
+		log.Println("Couldn't find user, making a new one")
 		o.UserMessages[userID] = UserMessageStat{
 			UserID:           userID,
 			Username:         m.Author.Username,
@@ -55,8 +60,8 @@ func (o *Overwatch) handleUserStat(s *discordgo.Session, m *discordgo.MessageCre
 
 func (o *Overwatch) Run() {
 	go func() {
-		for range time.Tick(30 * time.Second) {
-			log.Println("Printing UserMessages (30 Seconds)...")
+		for range time.Tick(10 * time.Second) {
+			log.Println("Printing UserMessages (10 Seconds)...")
 			for _, user := range o.UserMessages {
 				log.Printf("User: %+v\n", user)
 			}
