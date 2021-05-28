@@ -96,7 +96,7 @@ func main() {
 	// Setup Overwatch
 	o := overwatch.Overwatch{
 		TotalMessages: 0,
-		UserMessages:  make(map[string]overwatch.UserMessageStat),
+		UserMessages:  make(map[string]*overwatch.UserMessageStat),
 	}
 
 	// Add Handlers for Bot
