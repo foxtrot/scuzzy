@@ -33,12 +33,19 @@ func (f *Features) handleSetSlowmode(s *discordgo.Session, m *discordgo.MessageC
 
 			for _, channel := range channels {
 				s.ChannelEditComplex(channel.ID, &discordgo.ChannelEdit{
+					Position:         channel.Position,
 					RateLimitPerUser: slowModeTime,
 				})
 			}
 		}
 	} else {
-		_, err := s.ChannelEditComplex(m.ChannelID, &discordgo.ChannelEdit{
+		channel, err := s.Channel(m.ChannelID)
+		if err != nil {
+			return err
+		}
+
+		_, err = s.ChannelEditComplex(m.ChannelID, &discordgo.ChannelEdit{
+			Position:         channel.Position,
 			RateLimitPerUser: slowModeTime,
 		})
 		if err != nil {
