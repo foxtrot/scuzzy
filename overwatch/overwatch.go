@@ -62,6 +62,7 @@ func (o *Overwatch) Run() {
 	go func() {
 		for range time.Tick(10 * time.Second) {
 			for _, user := range o.UserMessages {
+				log.Printf("User: %+v", user)
 				// load the threshold from the config file
 				if user.MessagesLastTenSecs > 10 {
 					// Set slow mode, kick user? add kick count?
