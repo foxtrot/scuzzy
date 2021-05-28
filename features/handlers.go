@@ -50,6 +50,7 @@ func (f *Features) RegisterHandlers() {
 	f.RegisterCommand("purge", f.handlePurgeChannel)
 	f.RegisterCommand("kick", f.handleKickUser)
 	f.RegisterCommand("ban", f.handleBanUser)
+	f.RegisterCommand("slow", f.handleSetSlowmode)
 	f.RegisterCommand("ignore", f.handleIgnoreUser)
 	f.RegisterCommand("unignore", f.handleUnIgnoreUser)
 	f.RegisterCommand("setconfig", f.handleSetConfig)
