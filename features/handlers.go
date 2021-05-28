@@ -21,6 +21,8 @@ func (f *Features) RegisterCommand(name string, description string, adminonly bo
 }
 
 func (f *Features) RegisterHandlers() {
+	f.ScuzzyCommands = make(map[string]ScuzzyCommand)
+
 	// Misc Commands
 	f.RegisterCommand("help", "Show Help Text", false, f.handleHelp)
 	f.RegisterCommand("info", "Show Bot Info", false, f.handleInfo)
