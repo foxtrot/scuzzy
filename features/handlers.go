@@ -2,63 +2,66 @@ package features
 
 import (
 	"errors"
-	"github.com/bwmarrin/discordgo"
 	"log"
 	"strconv"
 	"strings"
+
+	"github.com/bwmarrin/discordgo"
 )
 
-type commandHandler func(session *discordgo.Session, m *discordgo.MessageCreate) error
-
-var commandHandlers = make(map[string]commandHandler)
-
-func (f *Features) RegisterCommand(name string, handlerFunc commandHandler) {
+func (f *Features) RegisterCommand(name string, description string, adminonly bool, handler ScuzzyHandler) {
 	log.Printf("[*] Registering Command '%s'\n", name)
-	commandHandlers[name] = handlerFunc
+	c := ScuzzyCommand{
+		Name:        name,
+		Description: description,
+		AdminOnly:   adminonly,
+		Handler:     handler,
+	}
+	f.ScuzzyCommands[name] = c
 }
 
 func (f *Features) RegisterHandlers() {
 	// Misc Commands
-	f.RegisterCommand("help", f.handleHelp)
-	f.RegisterCommand("info", f.handleInfo)
-	f.RegisterCommand("md", f.handleMarkdownInfo)
-	f.RegisterCommand("userinfo", f.handleUserInfo)
-	f.RegisterCommand("serverinfo", f.handleServerInfo)
-	f.RegisterCommand("no", f.handleCat)
+	f.RegisterCommand("help", "Show Help Text", false, f.handleHelp)
+	f.RegisterCommand("info", "Show Bot Info", false, f.handleInfo)
+	f.RegisterCommand("md", "Show common Discord MarkDown formatting", false, f.handleMarkdownInfo)
+	f.RegisterCommand("userinfo", "Display a users information", false, f.handleUserInfo)
+	f.RegisterCommand("serverinfo", "Display the current servers information", false, f.handleServerInfo)
+	f.RegisterCommand("no", "", false, f.handleCat)
 
 	// User Settings
-	f.RegisterCommand("colors", f.handleUserColors)
-	f.RegisterCommand("colours", f.handleUserColors)
-	f.RegisterCommand("color", f.handleUserColor)
-	f.RegisterCommand("colour", f.handleUserColor)
-	f.RegisterCommand("listroles", f.handleListCustomRoles)
-	f.RegisterCommand("joinrole", f.handleJoinCustomRole)
-	f.RegisterCommand("leaverole", f.handleLeaveCustomRole)
+	f.RegisterCommand("colours", "Display available colour roles", false, f.handleUserColors)
+	f.RegisterCommand("colors", "", false, f.handleUserColors)
+	f.RegisterCommand("colour", "Set a colour role for yourself", false, f.handleUserColor)
+	f.RegisterCommand("color", "", false, f.handleUserColor)
+	f.RegisterCommand("listroles", "List user joinable roles", false, f.handleListCustomRoles)
+	f.RegisterCommand("joinrole", "Join an available role for yourself", false, f.handleJoinCustomRole)
+	f.RegisterCommand("leaverole", "Leave an available role", false, f.handleLeaveCustomRole)
 
 	// Conversion Helpers
-	f.RegisterCommand("ctof", f.handleCtoF)
-	f.RegisterCommand("ftoc", f.handleFtoC)
-	f.RegisterCommand("metofe", f.handleMetersToFeet)
-	f.RegisterCommand("fetome", f.handleFeetToMeters)
-	f.RegisterCommand("cmtoin", f.handleCentimeterToInch)
-	f.RegisterCommand("intocm", f.handleInchToCentimeter)
+	f.RegisterCommand("ctof", "Convert Celsius to Farenheit", false, f.handleCtoF)
+	f.RegisterCommand("ftoc", "Convert Farenheit to Celsius", false, f.handleFtoC)
+	f.RegisterCommand("metofe", "Convert Meters to Feet", false, f.handleMetersToFeet)
+	f.RegisterCommand("fetome", "Convert Feet to Meters", false, f.handleFeetToMeters)
+	f.RegisterCommand("cmtoin", "Convert Centimeters to Inches", false, f.handleCentimeterToInch)
+	f.RegisterCommand("intocm", "Convert Inches to Centimeters", false, f.handleInchToCentimeter)
 
 	// Admin Commands
-	f.RegisterCommand("ping", f.handlePing)
-	f.RegisterCommand("rules", f.handleRules)
-	f.RegisterCommand("status", f.handleSetStatus)
-	f.RegisterCommand("purge", f.handlePurgeChannel)
-	f.RegisterCommand("kick", f.handleKickUser)
-	f.RegisterCommand("ban", f.handleBanUser)
-	f.RegisterCommand("slow", f.handleSetSlowmode)
-	f.RegisterCommand("unslow", f.handleUnsetSlowmode)
-	f.RegisterCommand("ignore", f.handleIgnoreUser)
-	f.RegisterCommand("unignore", f.handleUnIgnoreUser)
-	f.RegisterCommand("setconfig", f.handleSetConfig)
-	f.RegisterCommand("getconfig", f.handleGetConfig)
-	f.RegisterCommand("saveconfig", f.handleSaveConfig)
-	f.RegisterCommand("reloadconfig", f.handleReloadConfig)
-	f.RegisterCommand("addrole", f.handleAddCustomRole)
+	f.RegisterCommand("ping", "Ping Scuzzy", true, f.handlePing)
+	f.RegisterCommand("rules", "Display the Server Rules", true, f.handleRules)
+	f.RegisterCommand("status", "Set Bot Status", true, f.handleSetStatus)
+	f.RegisterCommand("purge", "Purge Channel Messages", true, f.handlePurgeChannel)
+	f.RegisterCommand("kick", "Kick a User", true, f.handleKickUser)
+	f.RegisterCommand("ban", "Ban a User", true, f.handleBanUser)
+	f.RegisterCommand("slow", "Set Channel Slow Mode", true, f.handleSetSlowmode)
+	f.RegisterCommand("unslow", "Unset Channel Slow Mode", true, f.handleUnsetSlowmode)
+	f.RegisterCommand("ignore", "Add a user to Scuzzy's ignore list", true, f.handleIgnoreUser)
+	f.RegisterCommand("unignore", "Remove a user from Scuzzy's ignore list", true, f.handleUnIgnoreUser)
+	f.RegisterCommand("setconfig", "Set Configuration", true, f.handleSetConfig)
+	f.RegisterCommand("getconfig", "Print Configuration", true, f.handleGetConfig)
+	f.RegisterCommand("saveconfig", "Save Configuration to Disk", true, f.handleSaveConfig)
+	f.RegisterCommand("reloadconfig", "Reload Configuration", true, f.handleReloadConfig)
+	f.RegisterCommand("addrole", "Add a joinable role", true, f.handleAddCustomRole)
 }
 
 func (f *Features) ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate) error {
@@ -88,10 +91,14 @@ func (f *Features) ProcessCommand(s *discordgo.Session, m *discordgo.MessageCrea
 
 	cName := strings.Split(cCmd, cKey)[1]
 
-	if cmdFunc, ok := commandHandlers[cName]; ok {
+	if cmd, ok := f.ScuzzyCommands[cName]; ok {
+		if cmd.AdminOnly && !f.Permissions.CheckAdminRole(m.Member) {
+			return errors.New("You do not have permissions to use this command.")
+		}
+
 		log.Printf("[*] Running command %s (Requested by %s)\n", cName, m.Author.Username)
 
-		err := cmdFunc(s, m)
+		err := cmd.Handler(s, m)
 		if err != nil {
 			log.Printf("[!] Command %s (Requested by %s) had error: '%s'\n", cName, m.Author.Username, err.Error())
 

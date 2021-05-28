@@ -289,44 +289,20 @@ func (f *Features) handleInfo(s *discordgo.Session, m *discordgo.MessageCreate) 
 
 func (f *Features) handleHelp(s *discordgo.Session, m *discordgo.MessageCreate) error {
 	desc := "**Available Commands**\n"
-	desc += "__Misc__\n"
-	desc += "`help` - This help dialog\n"
-	desc += "`info` - Display Scuzzy info\n"
-	desc += "`md` - Display Discord markdown information\n"
-	desc += "`userinfo` - Display information about a user\n"
-	desc += "`serverinfo` - Display information about the server\n"
-
-	desc += "\n__User Settings__\n"
-	desc += "`colors` - Available color roles\n"
-	desc += "`color` - Set an available color role\n"
-	desc += "`listroles` - List available roles\n"
-	desc += "`joinrole` - Join an available role\n"
-	desc += "`leaverole` - Leave a joined role\n"
-
-	desc += "\n__Conversion Helpers__\n"
-	desc += "`ctof` - Convert Celsius to Farenheit\n"
-	desc += "`ftoc` - Convert Farenheit to Celsius\n"
-	desc += "`metofe` - Convert Meters to Feet\n"
-	desc += "`fetome` - Convert Feet to Meters\n"
-	desc += "`cmtoin` - Convert Centimeters to Inches\n"
-	desc += "`intocm` - Convert Inches to Centimeters\n"
+	for _, command := range f.ScuzzyCommands {
+		if !command.AdminOnly && command.Description != "" {
+			desc += "`" + command.Name + "` - " + command.Description + "\n"
+		}
+	}
 
 	if f.Permissions.CheckAdminRole(m.Member) {
 		desc += "\n"
 		desc += "**Admin Commands**\n"
-		desc += "`ping` - Ping the bot\n"
-		desc += "`rules` - Display the server rules\n"
-		desc += "`status` - Set the bot status\n"
-		desc += "`purge` - Purge channel messages\n"
-		desc += "`kick` - Kick a specified user\n"
-		desc += "`ban` - Ban a specified user\n"
-		desc += "`ignore` - Ignore a specified user\n"
-		desc += "`unignore` - Unignore a specified user\n"
-		desc += "`setconfig` - Manage the runtime configuration\n"
-		desc += "`getconfig` - View the runtime configuration\n"
-		desc += "`reloadconfig` - Reload configuration from disk\n"
-		desc += "`saveconfig` - Save the runtime configuration to disk\n"
-		desc += "`addrole` - Add a user joinable role\n"
+		for _, command := range f.ScuzzyCommands {
+			if command.AdminOnly {
+				desc += "`" + command.Name + "` - " + command.Description + "\n"
+			}
+		}
 	}
 
 	desc += "\n\nAll commands are prefixed with `" + f.Config.CommandKey + "`\n"

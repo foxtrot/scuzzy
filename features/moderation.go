@@ -151,10 +151,6 @@ func (f *Features) handlePurgeChannel(s *discordgo.Session, m *discordgo.Message
 }
 
 func (f *Features) handleKickUser(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	if !f.Permissions.CheckAdminRole(m.Member) {
-		return errors.New("You do not have permissions to use this command.")
-	}
-
 	var (
 		mHandle    *discordgo.Member
 		kickReason string
