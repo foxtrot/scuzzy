@@ -38,7 +38,7 @@ func (o *Overwatch) handleUserStat(s *discordgo.Session, m *discordgo.MessageCre
 	if !ok {
 		o.UserMessages[userID] = UserMessageStat{
 			UserID:           userID,
-			Username:         m.Member.User.Username,
+			Username:         m.Author.Username,
 			MessagesLastDay:  0,
 			MessagesLastHour: 0,
 			MessagesLastFive: 0,
