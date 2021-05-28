@@ -7,12 +7,12 @@ import (
 )
 
 type UserMessageStat struct {
-	UserID               string
-	Username             string
-	MessagesLastDay      uint64
-	MessagesLastHour     uint64
-	MessagesLastFiveMins uint64
-	MessagesLastTenSecs  uint64
+	UserID                 string
+	Username               string
+	MessagesLastDay        uint64
+	MessagesLastHour       uint64
+	MessagesLastFiveMins   uint64
+	MessagesLastThirtySecs uint64
 }
 
 type Overwatch struct {
@@ -38,12 +38,12 @@ func (o *Overwatch) handleUserStat(s *discordgo.Session, m *discordgo.MessageCre
 	user, ok := o.UserMessages[userID]
 	if !ok {
 		o.UserMessages[userID] = &UserMessageStat{
-			UserID:               userID,
-			Username:             m.Author.Username,
-			MessagesLastDay:      0,
-			MessagesLastHour:     0,
-			MessagesLastFiveMins: 0,
-			MessagesLastTenSecs:  0,
+			UserID:                 userID,
+			Username:               m.Author.Username,
+			MessagesLastDay:        0,
+			MessagesLastHour:       0,
+			MessagesLastFiveMins:   0,
+			MessagesLastThirtySecs: 0,
 		}
 		user = o.UserMessages[userID]
 	}
@@ -51,7 +51,7 @@ func (o *Overwatch) handleUserStat(s *discordgo.Session, m *discordgo.MessageCre
 	user.MessagesLastDay++
 	user.MessagesLastHour++
 	user.MessagesLastFiveMins++
-	user.MessagesLastTenSecs++
+	user.MessagesLastThirtySecs++
 
 	return nil
 }
@@ -60,11 +60,11 @@ func (o *Overwatch) handleUserStat(s *discordgo.Session, m *discordgo.MessageCre
 func (o *Overwatch) Run() {
 	// Five second loop
 	go func() {
-		for range time.Tick(10 * time.Second) {
+		for range time.Tick(5 * time.Second) {
 			for _, user := range o.UserMessages {
 				log.Printf("User: %+v", user)
 				// load the threshold from the config file
-				if user.MessagesLastTenSecs > 10 {
+				if user.MessagesLastThirtySecs > 10 {
 					// Set slow mode, kick user? add kick count?
 					log.Printf("[*] User %s (%s) has triggered the message threshold.", user.Username, user.UserID)
 				}
@@ -74,10 +74,10 @@ func (o *Overwatch) Run() {
 
 	// Clear Counters
 	go func() {
-		for range time.Tick(10 * time.Second) {
+		for range time.Tick(30 * time.Second) {
 			log.Printf("[*] Resetting all users 10 second message counters")
 			for _, user := range o.UserMessages {
-				user.MessagesLastTenSecs = 0
+				user.MessagesLastThirtySecs = 0
 			}
 		}
 
