@@ -16,7 +16,7 @@ type UserMessageStat struct {
 
 type Overwatch struct {
 	TotalMessages uint64
-	UserMessages  map[string]UserMessageStat
+	UserMessages  map[string]*UserMessageStat
 }
 
 func (o *Overwatch) ProcessMessage(s *discordgo.Session, m interface{}) {
@@ -41,12 +41,12 @@ func (o *Overwatch) handleUserStat(s *discordgo.Session, m *discordgo.MessageCre
 	user, ok := o.UserMessages[userID]
 	if !ok {
 		log.Println("Couldn't find user, making a new one")
-		o.UserMessages[userID] = UserMessageStat{
+		o.UserMessages[userID] = &UserMessageStat{
 			UserID:           userID,
 			Username:         m.Author.Username,
-			MessagesLastDay:  1,
-			MessagesLastHour: 2,
-			MessagesLastFive: 3,
+			MessagesLastDay:  0,
+			MessagesLastHour: 0,
+			MessagesLastFive: 0,
 		}
 		user = o.UserMessages[userID]
 	}
