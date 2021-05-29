@@ -73,6 +73,7 @@ func (o *Overwatch) handleServerJoin(s *discordgo.Session, m *discordgo.GuildMem
 	// json value
 	if o.ServerStats.JoinsLastTenMins > 10 {
 		log.Printf("[*] User flood detected, enforcing slow mode on all channels for 30 minutes\n")
+		// Set slow mode on all channels
 		o.ServerStats.SlowmodeFlood = true
 		o.ServerStats.SlowmodeFloodStartTime = time.Now()
 		o.ServerStats.JoinsLastTenMins = 0
@@ -109,14 +110,28 @@ func (o *Overwatch) Run() {
 		for range time.Tick(30 * time.Second) {
 			if o.ServerStats.SlowmodeFlood {
 				// json value
-				if time.Since(o.ServerStats.SlowmodeFloodStartTime) > time.Minute*30 {
-					log.Printf("[*] Removing Slowmode for all channels after flood\n")
+				if o.ServerStats.JoinsLastTenMins > 10 {
+					if time.Since(o.ServerStats.SlowmodeFloodStartTime) > time.Minute*30 {
+						log.Printf("[*] Removing Slowmode for all channels after flood\n")
+						o.ServerStats.SlowmodeFlood = false
+						// remove slow mode
+					}
+				} else {
+					log.Printf("[*] Exending Slowmode due to sustained join flood\n")
+					o.ServerStats.SlowmodeFloodStartTime = time.Now()
 				}
 			}
 		}
 	}()
 
-	// Clear Counters
+	// Clear Server Counters
+	go func() {
+		for range time.Tick(10 * time.Minute) {
+			o.ServerStats.JoinsLastTenMins = 0
+		}
+	}()
+
+	// Clear User Counters
 	go func() {
 		for range time.Tick(24 * time.Hour) {
 			for _, user := range o.UserMessages {
