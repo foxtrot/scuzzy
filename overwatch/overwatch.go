@@ -69,6 +69,7 @@ func (o *Overwatch) Run() {
 					} else {
 						user.Kicks++
 						// kick that sucker
+						user.MessagesLastTenSecs = 0
 						log.Printf("[*] User %s (%s) has triggered the message threshold.", user.Username, user.UserID)
 					}
 				}
