@@ -50,6 +50,12 @@ func (o *Overwatch) ProcessMessage(s *discordgo.Session, m interface{}) {
 
 func (o *Overwatch) handleUserStat(s *discordgo.Session, m *discordgo.MessageCreate) error {
 	userID := m.Author.ID
+
+	if userID == s.State.User.ID {
+		// Ignore bots own actions
+		return nil
+	}
+
 	user, ok := o.UserMessages[userID]
 	if !ok {
 		o.UserMessages[userID] = &UserMessageStat{
@@ -83,6 +89,7 @@ func (o *Overwatch) handleServerJoin(s *discordgo.Session, m *discordgo.GuildMem
 
 // this is fucking amazing code
 func (o *Overwatch) Run() {
+	// this shit needs a go channel
 	// State of the art anti-spam loop
 	go func() {
 		for range time.Tick(5 * time.Second) {
