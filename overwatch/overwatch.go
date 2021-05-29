@@ -7,13 +7,13 @@ import (
 )
 
 type UserMessageStat struct {
-	UserID                 string
-	Username               string
-	MessagesLastDay        uint64
-	MessagesLastHour       uint64
-	MessagesLastFiveMins   uint64
-	MessagesLastThirtySecs uint64
-	Kicks                  int
+	UserID               string
+	Username             string
+	MessagesLastDay      uint64
+	MessagesLastHour     uint64
+	MessagesLastFiveMins uint64
+	MessagesLastTenSecs  uint64
+	Kicks                int
 }
 
 type Overwatch struct {
@@ -48,7 +48,7 @@ func (o *Overwatch) handleUserStat(s *discordgo.Session, m *discordgo.MessageCre
 	user.MessagesLastDay++
 	user.MessagesLastHour++
 	user.MessagesLastFiveMins++
-	user.MessagesLastThirtySecs++
+	user.MessagesLastTenSecs++
 
 	return nil
 }
@@ -60,10 +60,11 @@ func (o *Overwatch) Run() {
 		for range time.Tick(5 * time.Second) {
 			for _, user := range o.UserMessages {
 				// load the threshold from the config file, dipshit
-				if user.MessagesLastThirtySecs > 10 {
+				if user.MessagesLastTenSecs > 10 {
 					// Set slow mode, kick user? add kick count?
 					if user.Kicks > 2 {
 						// ban that sucker
+						delete(o.UserMessages, user.UserID)
 						log.Printf("[*] User %s (%s) was banned due to previous spam-related kicks", user.Username, user.UserID)
 					} else {
 						user.Kicks++
@@ -96,9 +97,9 @@ func (o *Overwatch) Run() {
 				user.MessagesLastFiveMins = 0
 			}
 		}
-		for range time.Tick(30 * time.Second) {
+		for range time.Tick(10 * time.Second) {
 			for _, user := range o.UserMessages {
-				user.MessagesLastThirtySecs = 0
+				user.MessagesLastTenSecs = 0
 			}
 		}
 	}()
