@@ -1,4 +1,4 @@
-package features
+package commands
 
 import (
 	"errors"
@@ -7,15 +7,15 @@ import (
 	"strings"
 )
 
-func (f *Features) handleListCustomRoles(s *discordgo.Session, m *discordgo.MessageCreate) error {
+func (c *Commands) handleListCustomRoles(s *discordgo.Session, m *discordgo.MessageCreate) error {
 	msgC := "You can choose from the following roles:\n\n"
-	for _, v := range f.Config.CustomRoles {
+	for _, v := range c.Config.CustomRoles {
 		msgC += "<@&" + v.ID + "> (" + v.ShortName + ")\n"
 	}
-	msgC += "\n\n Use `" + f.Config.CommandKey + "joinrole <role_name>` to join a role.\n"
-	msgC += "Example: `" + f.Config.CommandKey + "joinrole pineapple`.\n"
+	msgC += "\n\n Use `" + c.Config.CommandKey + "joinrole <role_name>` to join a role.\n"
+	msgC += "Example: `" + c.Config.CommandKey + "joinrole pineapple`.\n"
 
-	msg := f.CreateDefinedEmbed("Joinable Roles", msgC, "", m.Author)
+	msg := c.CreateDefinedEmbed("Joinable Roles", msgC, "", m.Author)
 
 	_, err := s.ChannelMessageSendEmbed(m.ChannelID, msg)
 	if err != nil {
@@ -25,14 +25,14 @@ func (f *Features) handleListCustomRoles(s *discordgo.Session, m *discordgo.Mess
 	return nil
 }
 
-func (f *Features) handleJoinCustomRole(s *discordgo.Session, m *discordgo.MessageCreate) error {
+func (c *Commands) handleJoinCustomRole(s *discordgo.Session, m *discordgo.MessageCreate) error {
 	var err error
 
 	rUserID := m.Author.ID
 
 	userInput := strings.Split(m.Content, " ")
 	if len(userInput) < 2 {
-		err = f.handleListCustomRoles(s, m)
+		err = c.handleListCustomRoles(s, m)
 		return err
 	}
 
@@ -40,7 +40,7 @@ func (f *Features) handleJoinCustomRole(s *discordgo.Session, m *discordgo.Messa
 	desiredRole = strings.ToLower(desiredRole)
 	desiredRoleID := ""
 
-	for _, role := range f.Config.CustomRoles {
+	for _, role := range c.Config.CustomRoles {
 		if role.ShortName == desiredRole {
 			desiredRoleID = role.ID
 			break
@@ -48,7 +48,7 @@ func (f *Features) handleJoinCustomRole(s *discordgo.Session, m *discordgo.Messa
 	}
 
 	if len(desiredRoleID) == 0 {
-		err = f.handleListCustomRoles(s, m)
+		err = c.handleListCustomRoles(s, m)
 		return err
 	}
 
@@ -56,7 +56,7 @@ func (f *Features) handleJoinCustomRole(s *discordgo.Session, m *discordgo.Messa
 	if err != nil {
 		return err
 	} else {
-		msg := f.CreateDefinedEmbed("Join Role", "<@"+m.Author.ID+">: You have joined <@&"+desiredRoleID+">!", "success", m.Author)
+		msg := c.CreateDefinedEmbed("Join Role", "<@"+m.Author.ID+">: You have joined <@&"+desiredRoleID+">!", "success", m.Author)
 		_, err = s.ChannelMessageSendEmbed(m.ChannelID, msg)
 		if err != nil {
 			return err
@@ -71,14 +71,14 @@ func (f *Features) handleJoinCustomRole(s *discordgo.Session, m *discordgo.Messa
 	return nil
 }
 
-func (f *Features) handleLeaveCustomRole(s *discordgo.Session, m *discordgo.MessageCreate) error {
+func (c *Commands) handleLeaveCustomRole(s *discordgo.Session, m *discordgo.MessageCreate) error {
 	var err error
 
 	rUserID := m.Author.ID
 
 	userInput := strings.Split(m.Content, " ")
 	if len(userInput) < 2 {
-		err = f.handleListCustomRoles(s, m)
+		err = c.handleListCustomRoles(s, m)
 		return err
 	}
 
@@ -86,7 +86,7 @@ func (f *Features) handleLeaveCustomRole(s *discordgo.Session, m *discordgo.Mess
 	desiredRole = strings.ToLower(desiredRole)
 	desiredRoleID := ""
 
-	for _, role := range f.Config.CustomRoles {
+	for _, role := range c.Config.CustomRoles {
 		if role.ShortName == desiredRole {
 			desiredRoleID = role.ID
 			break
@@ -94,7 +94,7 @@ func (f *Features) handleLeaveCustomRole(s *discordgo.Session, m *discordgo.Mess
 	}
 
 	if len(desiredRoleID) == 0 {
-		err = f.handleListCustomRoles(s, m)
+		err = c.handleListCustomRoles(s, m)
 		return err
 	}
 
@@ -102,7 +102,7 @@ func (f *Features) handleLeaveCustomRole(s *discordgo.Session, m *discordgo.Mess
 	if err != nil {
 		return err
 	} else {
-		msg := f.CreateDefinedEmbed("Leave Role", "<@"+m.Author.ID+">: You have left <@&"+desiredRoleID+">!", "success", m.Author)
+		msg := c.CreateDefinedEmbed("Leave Role", "<@"+m.Author.ID+">: You have left <@&"+desiredRoleID+">!", "success", m.Author)
 		_, err = s.ChannelMessageSendEmbed(m.ChannelID, msg)
 		if err != nil {
 			return err
@@ -117,10 +117,10 @@ func (f *Features) handleLeaveCustomRole(s *discordgo.Session, m *discordgo.Mess
 	return nil
 }
 
-func (f *Features) handleAddCustomRole(s *discordgo.Session, m *discordgo.MessageCreate) error {
+func (c *Commands) handleAddCustomRole(s *discordgo.Session, m *discordgo.MessageCreate) error {
 	var err error
 
-	if !f.Permissions.CheckAdminRole(m.Member) {
+	if !c.Permissions.CheckAdminRole(m.Member) {
 		return errors.New("You do not have permissions to use that command.")
 	}
 
@@ -139,9 +139,9 @@ func (f *Features) handleAddCustomRole(s *discordgo.Session, m *discordgo.Messag
 		ID:        roleID,
 	}
 
-	f.Config.CustomRoles = append(f.Config.CustomRoles, customRole)
+	c.Config.CustomRoles = append(c.Config.CustomRoles, customRole)
 
-	err = f.handleSaveConfig(s, m)
+	err = c.handleSaveConfig(s, m)
 	if err != nil {
 		return err
 	}

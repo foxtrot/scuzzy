@@ -1,4 +1,4 @@
-package features
+package commands
 
 import (
 	"github.com/bwmarrin/discordgo"
@@ -16,7 +16,7 @@ type ScuzzyCommand struct {
 	Handler     ScuzzyHandler
 }
 
-type Features struct {
+type Commands struct {
 	Token                 string
 	Permissions           *permissions.Permissions
 	Config                *models.Configuration

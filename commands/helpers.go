@@ -1,4 +1,4 @@
-package features
+package commands
 
 import (
 	"github.com/bwmarrin/discordgo"
@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func (f *Features) CreateDefinedEmbed(title string, desc string, status string, user *discordgo.User) *discordgo.MessageEmbed {
+func (c *Commands) CreateDefinedEmbed(title string, desc string, status string, user *discordgo.User) *discordgo.MessageEmbed {
 	msgColor := 0x000000
 
 	switch status {
@@ -50,7 +50,7 @@ func (f *Features) CreateDefinedEmbed(title string, desc string, status string, 
 	return &msg
 }
 
-func (f *Features) CreateCustomEmbed(embedData *models.CustomEmbed) *discordgo.MessageEmbed {
+func (c *Commands) CreateCustomEmbed(embedData *models.CustomEmbed) *discordgo.MessageEmbed {
 	var typ discordgo.EmbedType
 	var ftr discordgo.MessageEmbedFooter
 	var img discordgo.MessageEmbedImage

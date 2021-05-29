@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"github.com/foxtrot/scuzzy/features"
+	"github.com/foxtrot/scuzzy/commands"
 	"github.com/foxtrot/scuzzy/models"
 	"github.com/foxtrot/scuzzy/overwatch"
 	"github.com/foxtrot/scuzzy/permissions"
@@ -86,12 +86,12 @@ func main() {
 	Config.GuildName = g.Name
 
 	// Setup Handlers
-	f := features.Features{
+	c := commands.Commands{
 		Token:       Token,
 		Permissions: p,
 		Config:      &Config,
 	}
-	f.RegisterHandlers()
+	c.RegisterHandlers()
 
 	// Setup Overwatch
 	o := overwatch.Overwatch{
@@ -100,7 +100,7 @@ func main() {
 	}
 
 	// Add Handlers for Bot
-	bot.AddHandler(f.ProcessMessage)
+	bot.AddHandler(c.ProcessMessage)
 	bot.AddHandler(o.ProcessMessage)
 
 	log.Printf("[*] Bot Running.\n")

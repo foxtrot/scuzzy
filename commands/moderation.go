@@ -1,4 +1,4 @@
-package features
+package commands
 
 import (
 	"errors"
@@ -8,8 +8,8 @@ import (
 	"time"
 )
 
-func (f *Features) handleSetSlowmode(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	if !f.Permissions.CheckAdminRole(m.Member) {
+func (c *Commands) handleSetSlowmode(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	if !c.Permissions.CheckAdminRole(m.Member) {
 		return errors.New("You do not have permissions to use that command.")
 	}
 
@@ -26,7 +26,7 @@ func (f *Features) handleSetSlowmode(s *discordgo.Session, m *discordgo.MessageC
 
 	if len(slowmodeSplit) == 3 {
 		if slowmodeSplit[2] == "all" {
-			channels, err := s.GuildChannels(f.Config.GuildID)
+			channels, err := s.GuildChannels(c.Config.GuildID)
 			if err != nil {
 				return err
 			}
@@ -46,7 +46,7 @@ func (f *Features) handleSetSlowmode(s *discordgo.Session, m *discordgo.MessageC
 		}
 	}
 
-	msg := f.CreateDefinedEmbed("Slow Mode", "Successfully set Slow Mode to `"+slowmodeTimeStr+"`.", "success", m.Author)
+	msg := c.CreateDefinedEmbed("Slow Mode", "Successfully set Slow Mode to `"+slowmodeTimeStr+"`.", "success", m.Author)
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, msg)
 	if err != nil {
 		return err
@@ -55,8 +55,8 @@ func (f *Features) handleSetSlowmode(s *discordgo.Session, m *discordgo.MessageC
 	return nil
 }
 
-func (f *Features) handleUnsetSlowmode(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	if !f.Permissions.CheckAdminRole(m.Member) {
+func (c *Commands) handleUnsetSlowmode(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	if !c.Permissions.CheckAdminRole(m.Member) {
 		return errors.New("You do not have permissions to use that command.")
 	}
 
@@ -64,7 +64,7 @@ func (f *Features) handleUnsetSlowmode(s *discordgo.Session, m *discordgo.Messag
 
 	if len(slowmodeSplit) == 2 {
 		if slowmodeSplit[1] == "all" {
-			channels, err := s.GuildChannels(f.Config.GuildID)
+			channels, err := s.GuildChannels(c.Config.GuildID)
 			if err != nil {
 				return err
 			}
@@ -84,7 +84,7 @@ func (f *Features) handleUnsetSlowmode(s *discordgo.Session, m *discordgo.Messag
 		}
 	}
 
-	msg := f.CreateDefinedEmbed("Slow Mode", "Successfully unset Slow Mode", "success", m.Author)
+	msg := c.CreateDefinedEmbed("Slow Mode", "Successfully unset Slow Mode", "success", m.Author)
 	_, err := s.ChannelMessageSendEmbed(m.ChannelID, msg)
 	if err != nil {
 		return err
@@ -93,8 +93,8 @@ func (f *Features) handleUnsetSlowmode(s *discordgo.Session, m *discordgo.Messag
 	return nil
 }
 
-func (f *Features) handlePurgeChannel(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	if !f.Permissions.CheckAdminRole(m.Member) {
+func (c *Commands) handlePurgeChannel(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	if !c.Permissions.CheckAdminRole(m.Member) {
 		return errors.New("You do not have permissions to use that command.")
 	}
 
@@ -117,7 +117,7 @@ func (f *Features) handlePurgeChannel(s *discordgo.Session, m *discordgo.Message
 		return err
 	}
 
-	msg := f.CreateDefinedEmbed("Purge Channel", "Purging `"+purgeSplit[1]+"` messages.", "", m.Author)
+	msg := c.CreateDefinedEmbed("Purge Channel", "Purging `"+purgeSplit[1]+"` messages.", "", m.Author)
 	r, err := s.ChannelMessageSendEmbed(m.ChannelID, msg)
 	if err != nil {
 		return err
@@ -134,7 +134,7 @@ func (f *Features) handlePurgeChannel(s *discordgo.Session, m *discordgo.Message
 	}
 
 	err = s.ChannelMessageDelete(m.ChannelID, r.ID)
-	msg = f.CreateDefinedEmbed("Purge Channel", "Purged `"+purgeSplit[1]+"` messages!", "success", m.Author)
+	msg = c.CreateDefinedEmbed("Purge Channel", "Purged `"+purgeSplit[1]+"` messages!", "success", m.Author)
 	msgS, err := s.ChannelMessageSendEmbed(m.ChannelID, msg)
 	if err != nil {
 		return err
@@ -150,7 +150,7 @@ func (f *Features) handlePurgeChannel(s *discordgo.Session, m *discordgo.Message
 	return nil
 }
 
-func (f *Features) handleKickUser(s *discordgo.Session, m *discordgo.MessageCreate) error {
+func (c *Commands) handleKickUser(s *discordgo.Session, m *discordgo.MessageCreate) error {
 	var (
 		mHandle    *discordgo.Member
 		kickReason string
@@ -169,12 +169,12 @@ func (f *Features) handleKickUser(s *discordgo.Session, m *discordgo.MessageCrea
 	idStr := strings.ReplaceAll(member, "<@!", "")
 	idStr = strings.ReplaceAll(idStr, "<@", "")
 	idStr = strings.ReplaceAll(idStr, ">", "")
-	mHandle, err = s.GuildMember(f.Config.GuildID, idStr)
+	mHandle, err = s.GuildMember(c.Config.GuildID, idStr)
 	if err != nil {
 		return err
 	}
 
-	err = s.GuildMemberDeleteWithReason(f.Config.GuildID, mHandle.User.ID, kickReason)
+	err = s.GuildMemberDeleteWithReason(c.Config.GuildID, mHandle.User.ID, kickReason)
 	if err != nil {
 		return err
 	}
@@ -184,7 +184,7 @@ func (f *Features) handleKickUser(s *discordgo.Session, m *discordgo.MessageCrea
 		msg += "Reason: `" + kickReason + "`\n"
 	}
 
-	embed := f.CreateDefinedEmbed("Kick User", msg, "success", m.Author)
+	embed := c.CreateDefinedEmbed("Kick User", msg, "success", m.Author)
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, embed)
 	if err != nil {
 		return err
@@ -193,8 +193,8 @@ func (f *Features) handleKickUser(s *discordgo.Session, m *discordgo.MessageCrea
 	return nil
 }
 
-func (f *Features) handleBanUser(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	if !f.Permissions.CheckAdminRole(m.Member) {
+func (c *Commands) handleBanUser(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	if !c.Permissions.CheckAdminRole(m.Member) {
 		return errors.New("You do not have permissions to use this command.")
 	}
 
@@ -221,7 +221,7 @@ func (f *Features) handleBanUser(s *discordgo.Session, m *discordgo.MessageCreat
 		return err
 	}
 
-	err = s.GuildBanCreateWithReason(f.Config.GuildID, mHandle.ID, banReason, 0)
+	err = s.GuildBanCreateWithReason(c.Config.GuildID, mHandle.ID, banReason, 0)
 	if err != nil {
 		return err
 	}
@@ -231,7 +231,7 @@ func (f *Features) handleBanUser(s *discordgo.Session, m *discordgo.MessageCreat
 		msg += "Reason: `" + banReason + "`\n"
 	}
 
-	embed := f.CreateDefinedEmbed("Ban User", msg, "success", m.Author)
+	embed := c.CreateDefinedEmbed("Ban User", msg, "success", m.Author)
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, embed)
 	if err != nil {
 		return err
@@ -240,8 +240,8 @@ func (f *Features) handleBanUser(s *discordgo.Session, m *discordgo.MessageCreat
 	return nil
 }
 
-func (f *Features) handleIgnoreUser(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	if !f.Permissions.CheckAdminRole(m.Member) {
+func (c *Commands) handleIgnoreUser(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	if !c.Permissions.CheckAdminRole(m.Member) {
 		return errors.New("You do not have permissions to use this command.")
 	}
 
@@ -255,15 +255,15 @@ func (f *Features) handleIgnoreUser(s *discordgo.Session, m *discordgo.MessageCr
 	idStr = strings.ReplaceAll(idStr, "<@", "")
 	idStr = strings.ReplaceAll(idStr, ">", "")
 
-	f.Config.IgnoredUsers = append(f.Config.IgnoredUsers, idStr)
+	c.Config.IgnoredUsers = append(c.Config.IgnoredUsers, idStr)
 
-	eMsg := f.CreateDefinedEmbed("Ignore User", "<@!"+idStr+"> is now being ignored.", "success", m.Author)
+	eMsg := c.CreateDefinedEmbed("Ignore User", "<@!"+idStr+"> is now being ignored.", "success", m.Author)
 	_, err := s.ChannelMessageSendEmbed(m.ChannelID, eMsg)
 	if err != nil {
 		return err
 	}
 
-	err = f.handleSaveConfig(s, m)
+	err = c.handleSaveConfig(s, m)
 	if err != nil {
 		return err
 	}
@@ -271,8 +271,8 @@ func (f *Features) handleIgnoreUser(s *discordgo.Session, m *discordgo.MessageCr
 	return nil
 }
 
-func (f *Features) handleUnIgnoreUser(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	if !f.Permissions.CheckAdminRole(m.Member) {
+func (c *Commands) handleUnIgnoreUser(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	if !c.Permissions.CheckAdminRole(m.Member) {
 		return errors.New("You do not have permissions to use this command.")
 	}
 
@@ -286,20 +286,20 @@ func (f *Features) handleUnIgnoreUser(s *discordgo.Session, m *discordgo.Message
 	idStr = strings.ReplaceAll(idStr, "<@", "")
 	idStr = strings.ReplaceAll(idStr, ">", "")
 
-	for k, v := range f.Config.IgnoredUsers {
+	for k, v := range c.Config.IgnoredUsers {
 		if v == idStr {
-			f.Config.IgnoredUsers[k] = f.Config.IgnoredUsers[len(f.Config.IgnoredUsers)-1]
-			f.Config.IgnoredUsers = f.Config.IgnoredUsers[:len(f.Config.IgnoredUsers)-1]
+			c.Config.IgnoredUsers[k] = c.Config.IgnoredUsers[len(c.Config.IgnoredUsers)-1]
+			c.Config.IgnoredUsers = c.Config.IgnoredUsers[:len(c.Config.IgnoredUsers)-1]
 		}
 	}
 
-	eMsg := f.CreateDefinedEmbed("Unignore User", "<@!"+idStr+"> is not being ignored.", "success", m.Author)
+	eMsg := c.CreateDefinedEmbed("Unignore User", "<@!"+idStr+"> is not being ignored.", "success", m.Author)
 	_, err := s.ChannelMessageSendEmbed(m.ChannelID, eMsg)
 	if err != nil {
 		return err
 	}
 
-	err = f.handleSaveConfig(s, m)
+	err = c.handleSaveConfig(s, m)
 	if err != nil {
 		return err
 	}

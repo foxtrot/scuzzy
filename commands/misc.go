@@ -1,4 +1,4 @@
-package features
+package commands
 
 import (
 	"encoding/json"
@@ -16,28 +16,28 @@ import (
 	"github.com/foxtrot/scuzzy/models"
 )
 
-func (f *Features) handleSetConfig(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	if !f.Permissions.CheckAdminRole(m.Member) {
+func (c *Commands) handleSetConfig(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	if !c.Permissions.CheckAdminRole(m.Member) {
 		return errors.New("You do not have permissions to use that command.")
 	}
 
 	configArgs := strings.Split(m.Content, " ")
 
 	if len(configArgs) != 3 {
-		return errors.New("Invalid arguments supplied. Usage: " + f.Config.CommandKey + "setconfig <key> <value>")
+		return errors.New("Invalid arguments supplied. Usage: " + c.Config.CommandKey + "setconfig <key> <value>")
 	}
 
 	configKey := configArgs[1]
 	configVal := configArgs[2]
 
-	rt := reflect.TypeOf(f.Config)
+	rt := reflect.TypeOf(c.Config)
 	for i := 0; i < rt.NumField(); i++ {
 		x := rt.Field(i)
 		tagVal := strings.Split(x.Tag.Get("json"), ",")[0]
 		tagName := x.Name
 
 		if tagVal == configKey {
-			prop := reflect.ValueOf(&f.Config).Elem().FieldByName(tagName)
+			prop := reflect.ValueOf(&c.Config).Elem().FieldByName(tagName)
 
 			switch prop.Interface().(type) {
 			case string:
@@ -68,7 +68,7 @@ func (f *Features) handleSetConfig(s *discordgo.Session, m *discordgo.MessageCre
 				return errors.New("Unsupported key value type")
 			}
 
-			msgE := f.CreateDefinedEmbed("Set Configuration", "Successfully set property '"+configKey+"'!", "success", m.Author)
+			msgE := c.CreateDefinedEmbed("Set Configuration", "Successfully set property '"+configKey+"'!", "success", m.Author)
 			_, err := s.ChannelMessageSendEmbed(m.ChannelID, msgE)
 			if err != nil {
 				return err
@@ -81,10 +81,10 @@ func (f *Features) handleSetConfig(s *discordgo.Session, m *discordgo.MessageCre
 	return errors.New("Unknown key specified")
 }
 
-func (f *Features) handleGetConfig(s *discordgo.Session, m *discordgo.MessageCreate) error {
+func (c *Commands) handleGetConfig(s *discordgo.Session, m *discordgo.MessageCreate) error {
 	//TODO: Handle printing of slices (check the Type, loop accordingly)
 
-	if !f.Permissions.CheckAdminRole(m.Member) {
+	if !c.Permissions.CheckAdminRole(m.Member) {
 		return errors.New("You do not have permissions to use that command.")
 	}
 
@@ -96,12 +96,12 @@ func (f *Features) handleGetConfig(s *discordgo.Session, m *discordgo.MessageCre
 
 	msg := ""
 
-	rt := reflect.TypeOf(f.Config)
+	rt := reflect.TypeOf(c.Config)
 	for i := 0; i < rt.NumField(); i++ {
 		x := rt.Field(i)
 		tagVal := strings.Split(x.Tag.Get("json"), ",")[0]
 		tagName := x.Name
-		prop := reflect.ValueOf(&f.Config).Elem().FieldByName(tagName)
+		prop := reflect.ValueOf(&c.Config).Elem().FieldByName(tagName)
 
 		if configKey == "all" {
 			switch prop.Interface().(type) {
@@ -128,7 +128,7 @@ func (f *Features) handleGetConfig(s *discordgo.Session, m *discordgo.MessageCre
 					msg += "`" + tagName + "` - Skipped Value\n"
 				}
 
-				eMsg := f.CreateDefinedEmbed("Get Configuration", msg, "success", m.Author)
+				eMsg := c.CreateDefinedEmbed("Get Configuration", msg, "success", m.Author)
 				_, err := s.ChannelMessageSendEmbed(m.ChannelID, eMsg)
 				if err != nil {
 					return err
@@ -143,7 +143,7 @@ func (f *Features) handleGetConfig(s *discordgo.Session, m *discordgo.MessageCre
 		return errors.New("Unknown key specified")
 	}
 
-	eMsg := f.CreateDefinedEmbed("Get Configuration", msg, "success", m.Author)
+	eMsg := c.CreateDefinedEmbed("Get Configuration", msg, "success", m.Author)
 	_, err := s.ChannelMessageSendEmbed(m.ChannelID, eMsg)
 	if err != nil {
 		return err
@@ -152,12 +152,12 @@ func (f *Features) handleGetConfig(s *discordgo.Session, m *discordgo.MessageCre
 	return nil
 }
 
-func (f *Features) handleReloadConfig(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	if !f.Permissions.CheckAdminRole(m.Member) {
+func (c *Commands) handleReloadConfig(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	if !c.Permissions.CheckAdminRole(m.Member) {
 		return errors.New("You do not have permissions to use this command.")
 	}
 
-	fBuf, err := ioutil.ReadFile(f.Config.ConfigPath)
+	fBuf, err := ioutil.ReadFile(c.Config.ConfigPath)
 	if err != nil {
 		return err
 	}
@@ -169,10 +169,10 @@ func (f *Features) handleReloadConfig(s *discordgo.Session, m *discordgo.Message
 		return err
 	}
 
-	f.Config = conf
-	f.Permissions.Config = conf
+	c.Config = conf
+	c.Permissions.Config = conf
 
-	eMsg := f.CreateDefinedEmbed("Reload Configuration", "Successfully reloaded configuration from disk", "success", m.Author)
+	eMsg := c.CreateDefinedEmbed("Reload Configuration", "Successfully reloaded configuration from disk", "success", m.Author)
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, eMsg)
 	if err != nil {
 		return err
@@ -181,22 +181,22 @@ func (f *Features) handleReloadConfig(s *discordgo.Session, m *discordgo.Message
 	return nil
 }
 
-func (f *Features) handleSaveConfig(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	if !f.Permissions.CheckAdminRole(m.Member) {
+func (c *Commands) handleSaveConfig(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	if !c.Permissions.CheckAdminRole(m.Member) {
 		return errors.New("You do not have permissions to use this command.")
 	}
 
-	j, err := json.Marshal(f.Config)
+	j, err := json.Marshal(c.Config)
 	if err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile(f.Config.ConfigPath, j, os.ModePerm)
+	err = ioutil.WriteFile(c.Config.ConfigPath, j, os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	eMsg := f.CreateDefinedEmbed("Save Configuration", "Saved runtime configuration successfully", "success", m.Author)
+	eMsg := c.CreateDefinedEmbed("Save Configuration", "Saved runtime configuration successfully", "success", m.Author)
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, eMsg)
 	if err != nil {
 		return err
@@ -205,7 +205,7 @@ func (f *Features) handleSaveConfig(s *discordgo.Session, m *discordgo.MessageCr
 	return nil
 }
 
-func (f *Features) handleCat(s *discordgo.Session, m *discordgo.MessageCreate) error {
+func (c *Commands) handleCat(s *discordgo.Session, m *discordgo.MessageCreate) error {
 	_, err := s.ChannelMessageSend(m.ChannelID, "https://giphy.com/gifs/cat-cute-no-rCxogJBzaeZuU")
 	if err != nil {
 		return err
@@ -219,14 +219,14 @@ func (f *Features) handleCat(s *discordgo.Session, m *discordgo.MessageCreate) e
 	return nil
 }
 
-func (f *Features) handlePing(s *discordgo.Session, m *discordgo.MessageCreate) error {
+func (c *Commands) handlePing(s *discordgo.Session, m *discordgo.MessageCreate) error {
 	var r *discordgo.Message
 	var err error
 
-	if !f.Permissions.CheckAdminRole(m.Member) {
+	if !c.Permissions.CheckAdminRole(m.Member) {
 		return errors.New("You do not have permissions to use that command.")
 	} else {
-		msg := f.CreateDefinedEmbed("Ping", "Pong", "success", m.Author)
+		msg := c.CreateDefinedEmbed("Ping", "Pong", "success", m.Author)
 		r, err = s.ChannelMessageSendEmbed(m.ChannelID, msg)
 		if err != nil {
 			return err
@@ -247,12 +247,12 @@ func (f *Features) handlePing(s *discordgo.Session, m *discordgo.MessageCreate) 
 	return nil
 }
 
-func (f *Features) handleInfo(s *discordgo.Session, m *discordgo.MessageCreate) error {
+func (c *Commands) handleInfo(s *discordgo.Session, m *discordgo.MessageCreate) error {
 	desc := "**Source**:   https://github.com/foxtrot/scuzzy\n"
 	desc += "**Language**: Go\n"
-	desc += "**Commands**: See `" + f.Config.CommandKey + "help`\n\n\n"
+	desc += "**Commands**: See `" + c.Config.CommandKey + "help`\n\n\n"
 
-	gm, err := s.GuildMember(f.Config.GuildID, s.State.User.ID)
+	gm, err := s.GuildMember(c.Config.GuildID, s.State.User.ID)
 	if err != nil {
 		return err
 	}
@@ -279,7 +279,7 @@ func (f *Features) handleInfo(s *discordgo.Session, m *discordgo.MessageCreate) 
 		AuthorImageURL: "",
 	}
 
-	msg := f.CreateCustomEmbed(&d)
+	msg := c.CreateCustomEmbed(&d)
 
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, msg)
 	if err != nil {
@@ -289,31 +289,31 @@ func (f *Features) handleInfo(s *discordgo.Session, m *discordgo.MessageCreate) 
 	return nil
 }
 
-func (f *Features) handleHelp(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	keys := make([]int, 0, len(f.ScuzzyCommands))
-	for _, cmd := range f.ScuzzyCommands {
+func (c *Commands) handleHelp(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	keys := make([]int, 0, len(c.ScuzzyCommands))
+	for _, cmd := range c.ScuzzyCommands {
 		keys = append(keys, cmd.Index)
 	}
 	sort.Ints(keys)
 
 	for _, k := range keys {
-		fmt.Println(k, f.ScuzzyCommandsByIndex[k])
+		fmt.Println(k, c.ScuzzyCommandsByIndex[k])
 	}
 
 	desc := "**Available Commands**\n"
 	for _, k := range keys {
-		command := f.ScuzzyCommandsByIndex[k]
+		command := c.ScuzzyCommandsByIndex[k]
 
 		if !command.AdminOnly && command.Description != "" {
 			desc += "`" + command.Name + "` - " + command.Description + "\n"
 		}
 	}
 
-	if f.Permissions.CheckAdminRole(m.Member) {
+	if c.Permissions.CheckAdminRole(m.Member) {
 		desc += "\n"
 		desc += "**Admin Commands**\n"
 		for _, k := range keys {
-			command := f.ScuzzyCommandsByIndex[k]
+			command := c.ScuzzyCommandsByIndex[k]
 
 			if command.AdminOnly {
 				desc += "`" + command.Name + "` - " + command.Description + "\n"
@@ -321,9 +321,9 @@ func (f *Features) handleHelp(s *discordgo.Session, m *discordgo.MessageCreate) 
 		}
 	}
 
-	desc += "\n\nAll commands are prefixed with `" + f.Config.CommandKey + "`\n"
+	desc += "\n\nAll commands are prefixed with `" + c.Config.CommandKey + "`\n"
 
-	msg := f.CreateDefinedEmbed("Help", desc, "", m.Author)
+	msg := c.CreateDefinedEmbed("Help", desc, "", m.Author)
 
 	_, err := s.ChannelMessageSendEmbed(m.ChannelID, msg)
 	if err != nil {
@@ -337,14 +337,14 @@ func (f *Features) handleHelp(s *discordgo.Session, m *discordgo.MessageCreate) 
 	return nil
 }
 
-func (f *Features) handleRules(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	if !f.Permissions.CheckAdminRole(m.Member) {
+func (c *Commands) handleRules(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	if !c.Permissions.CheckAdminRole(m.Member) {
 		return errors.New("You do not have permissions to use that command.")
 	}
 
-	msg := f.Config.RulesText
-	embedTitle := "Rules (" + f.Config.GuildName + ")"
-	embed := f.CreateDefinedEmbed(embedTitle, msg, "success", m.Author)
+	msg := c.Config.RulesText
+	embedTitle := "Rules (" + c.Config.GuildName + ")"
+	embed := c.CreateDefinedEmbed(embedTitle, msg, "success", m.Author)
 
 	_, err := s.ChannelMessageSendEmbed(m.ChannelID, embed)
 	if err != nil {
@@ -354,12 +354,12 @@ func (f *Features) handleRules(s *discordgo.Session, m *discordgo.MessageCreate)
 	return nil
 }
 
-func (f *Features) handleMarkdownInfo(s *discordgo.Session, m *discordgo.MessageCreate) error {
+func (c *Commands) handleMarkdownInfo(s *discordgo.Session, m *discordgo.MessageCreate) error {
 	cleanup := true
 	args := strings.Split(m.Content, " ")
 
 	if len(args) == 2 {
-		if args[1] == "stay" && f.Permissions.CheckAdminRole(m.Member) {
+		if args[1] == "stay" && c.Permissions.CheckAdminRole(m.Member) {
 			cleanup = false
 		}
 	}
@@ -377,7 +377,7 @@ func (f *Features) handleMarkdownInfo(s *discordgo.Session, m *discordgo.Message
 	desc += "Single line quotes start with `>`\n"
 	desc += "Multi line quotes start with `>>>`\n"
 
-	msg := f.CreateDefinedEmbed("Discord Markdown", desc, "", m.Author)
+	msg := c.CreateDefinedEmbed("Discord Markdown", desc, "", m.Author)
 	r, err := s.ChannelMessageSendEmbed(m.ChannelID, msg)
 	if err != nil {
 		return err
@@ -399,7 +399,7 @@ func (f *Features) handleMarkdownInfo(s *discordgo.Session, m *discordgo.Message
 	return nil
 }
 
-func (f *Features) handleCtoF(s *discordgo.Session, m *discordgo.MessageCreate) error {
+func (c *Commands) handleCtoF(s *discordgo.Session, m *discordgo.MessageCreate) error {
 	inS := strings.Split(m.Content, " ")
 
 	if len(inS) < 2 {
@@ -417,7 +417,7 @@ func (f *Features) handleCtoF(s *discordgo.Session, m *discordgo.MessageCreate) 
 
 	msg := fmt.Sprintf("`%.1f°c` is `%.1f°f`", inF, celsF)
 
-	e := f.CreateDefinedEmbed("Celsius to Farenheit", msg, "", m.Author)
+	e := c.CreateDefinedEmbed("Celsius to Farenheit", msg, "", m.Author)
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, e)
 	if err != nil {
 		return err
@@ -426,7 +426,7 @@ func (f *Features) handleCtoF(s *discordgo.Session, m *discordgo.MessageCreate) 
 	return nil
 }
 
-func (f *Features) handleFtoC(s *discordgo.Session, m *discordgo.MessageCreate) error {
+func (c *Commands) handleFtoC(s *discordgo.Session, m *discordgo.MessageCreate) error {
 	inS := strings.Split(m.Content, " ")
 
 	if len(inS) < 2 {
@@ -444,7 +444,7 @@ func (f *Features) handleFtoC(s *discordgo.Session, m *discordgo.MessageCreate) 
 
 	msg := fmt.Sprintf("`%.1f°f` is `%.1f°c`", inF, farenF)
 
-	e := f.CreateDefinedEmbed("Farenheit to Celsius", msg, "", m.Author)
+	e := c.CreateDefinedEmbed("Farenheit to Celsius", msg, "", m.Author)
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, e)
 	if err != nil {
 		return err
@@ -453,7 +453,7 @@ func (f *Features) handleFtoC(s *discordgo.Session, m *discordgo.MessageCreate) 
 	return nil
 }
 
-func (f *Features) handleMetersToFeet(s *discordgo.Session, m *discordgo.MessageCreate) error {
+func (c *Commands) handleMetersToFeet(s *discordgo.Session, m *discordgo.MessageCreate) error {
 	inS := strings.Split(m.Content, " ")
 
 	if len(inS) < 2 {
@@ -471,7 +471,7 @@ func (f *Features) handleMetersToFeet(s *discordgo.Session, m *discordgo.Message
 
 	msg := fmt.Sprintf("`%.1fm` is `%.1fft`", inF, metersF)
 
-	e := f.CreateDefinedEmbed("Meters to Feet", msg, "", m.Author)
+	e := c.CreateDefinedEmbed("Meters to Feet", msg, "", m.Author)
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, e)
 	if err != nil {
 		return err
@@ -480,7 +480,7 @@ func (f *Features) handleMetersToFeet(s *discordgo.Session, m *discordgo.Message
 	return nil
 }
 
-func (f *Features) handleFeetToMeters(s *discordgo.Session, m *discordgo.MessageCreate) error {
+func (c *Commands) handleFeetToMeters(s *discordgo.Session, m *discordgo.MessageCreate) error {
 	inS := strings.Split(m.Content, " ")
 
 	if len(inS) < 2 {
@@ -498,7 +498,7 @@ func (f *Features) handleFeetToMeters(s *discordgo.Session, m *discordgo.Message
 
 	msg := fmt.Sprintf("`%.1fft` is `%.1fm`", inF, feetF)
 
-	e := f.CreateDefinedEmbed("Feet to Meters", msg, "", m.Author)
+	e := c.CreateDefinedEmbed("Feet to Meters", msg, "", m.Author)
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, e)
 	if err != nil {
 		return err
@@ -507,7 +507,7 @@ func (f *Features) handleFeetToMeters(s *discordgo.Session, m *discordgo.Message
 	return nil
 }
 
-func (f *Features) handleCentimeterToInch(s *discordgo.Session, m *discordgo.MessageCreate) error {
+func (c *Commands) handleCentimeterToInch(s *discordgo.Session, m *discordgo.MessageCreate) error {
 	inS := strings.Split(m.Content, " ")
 
 	if len(inS) < 2 {
@@ -525,7 +525,7 @@ func (f *Features) handleCentimeterToInch(s *discordgo.Session, m *discordgo.Mes
 
 	msg := fmt.Sprintf("`%.1fcm` is `%.1fin`", inF, inchF)
 
-	e := f.CreateDefinedEmbed("Centimeter To Inch", msg, "", m.Author)
+	e := c.CreateDefinedEmbed("Centimeter To Inch", msg, "", m.Author)
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, e)
 	if err != nil {
 		return err
@@ -534,7 +534,7 @@ func (f *Features) handleCentimeterToInch(s *discordgo.Session, m *discordgo.Mes
 	return nil
 }
 
-func (f *Features) handleInchToCentimeter(s *discordgo.Session, m *discordgo.MessageCreate) error {
+func (c *Commands) handleInchToCentimeter(s *discordgo.Session, m *discordgo.MessageCreate) error {
 	inS := strings.Split(m.Content, " ")
 
 	if len(inS) < 2 {
@@ -552,7 +552,7 @@ func (f *Features) handleInchToCentimeter(s *discordgo.Session, m *discordgo.Mes
 
 	msg := fmt.Sprintf("`%.1fin` is `%.1fcm`", inF, cmF)
 
-	e := f.CreateDefinedEmbed("Inch to Centimeter", msg, "", m.Author)
+	e := c.CreateDefinedEmbed("Inch to Centimeter", msg, "", m.Author)
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, e)
 	if err != nil {
 		return err
@@ -561,7 +561,7 @@ func (f *Features) handleInchToCentimeter(s *discordgo.Session, m *discordgo.Mes
 	return nil
 }
 
-func (f *Features) handleUserInfo(s *discordgo.Session, m *discordgo.MessageCreate) error {
+func (c *Commands) handleUserInfo(s *discordgo.Session, m *discordgo.MessageCreate) error {
 	var (
 		mHandle   *discordgo.Member
 		requester *discordgo.Member
@@ -571,7 +571,7 @@ func (f *Features) handleUserInfo(s *discordgo.Session, m *discordgo.MessageCrea
 	userSplit := strings.Split(m.Content, " ")
 
 	if len(userSplit) < 2 {
-		mHandle, err = s.GuildMember(f.Config.GuildID, m.Author.ID)
+		mHandle, err = s.GuildMember(c.Config.GuildID, m.Author.ID)
 		requester = mHandle
 		if err != nil {
 			return err
@@ -580,11 +580,11 @@ func (f *Features) handleUserInfo(s *discordgo.Session, m *discordgo.MessageCrea
 		idStr := strings.ReplaceAll(userSplit[1], "<@!", "")
 		idStr = strings.ReplaceAll(idStr, "<@", "")
 		idStr = strings.ReplaceAll(idStr, ">", "")
-		mHandle, err = s.GuildMember(f.Config.GuildID, idStr)
+		mHandle, err = s.GuildMember(c.Config.GuildID, idStr)
 		if err != nil {
 			return err
 		}
-		requester, err = s.GuildMember(f.Config.GuildID, m.Author.ID)
+		requester, err = s.GuildMember(c.Config.GuildID, m.Author.ID)
 		if err != nil {
 			return err
 		}
@@ -645,7 +645,7 @@ func (f *Features) handleUserInfo(s *discordgo.Session, m *discordgo.MessageCrea
 		AuthorImageURL: "",
 	}
 
-	embed := f.CreateCustomEmbed(&embedData)
+	embed := c.CreateCustomEmbed(&embedData)
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, embed)
 	if err != nil {
 		return err
@@ -654,22 +654,22 @@ func (f *Features) handleUserInfo(s *discordgo.Session, m *discordgo.MessageCrea
 	return nil
 }
 
-func (f *Features) handleServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	g, err := s.Guild(f.Config.GuildID)
+func (c *Commands) handleServerInfo(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	g, err := s.Guild(c.Config.GuildID)
 	if err != nil {
 		return err
 	}
 
-	sID := f.Config.GuildID
-	sName := f.Config.GuildName
+	sID := c.Config.GuildID
+	sName := c.Config.GuildName
 
-	chans, _ := s.GuildChannels(f.Config.GuildID)
+	chans, _ := s.GuildChannels(c.Config.GuildID)
 	sChannels := strconv.Itoa(len(chans))
 	sEmojis := strconv.Itoa(len(g.Emojis))
 	sRoles := strconv.Itoa(len(g.Roles))
 	sRegion := g.Region
 
-	iID, _ := strconv.Atoi(f.Config.GuildID)
+	iID, _ := strconv.Atoi(c.Config.GuildID)
 	createdMSecs := ((iID / 4194304) + 1420070400000) / 1000
 	sCreatedAt := time.Unix(int64(createdMSecs), 0).Format(time.RFC1123)
 
@@ -707,7 +707,7 @@ func (f *Features) handleServerInfo(s *discordgo.Session, m *discordgo.MessageCr
 		AuthorImageURL: "",
 	}
 
-	msg := f.CreateCustomEmbed(&embedData)
+	msg := c.CreateCustomEmbed(&embedData)
 
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, msg)
 	if err != nil {

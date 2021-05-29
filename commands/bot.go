@@ -1,4 +1,4 @@
-package features
+package commands
 
 import (
 	"errors"
@@ -9,8 +9,8 @@ import (
 	"time"
 )
 
-func (f *Features) handleSetStatus(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	if !f.Permissions.CheckAdminRole(m.Member) {
+func (c *Commands) handleSetStatus(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	if !c.Permissions.CheckAdminRole(m.Member) {
 		return errors.New("You do not have permissions to use that command.")
 	}
 
@@ -26,7 +26,7 @@ func (f *Features) handleSetStatus(s *discordgo.Session, m *discordgo.MessageCre
 		return err
 	}
 
-	msg := f.CreateDefinedEmbed("Set Status", "Operation completed successfully.", "success", m.Author)
+	msg := c.CreateDefinedEmbed("Set Status", "Operation completed successfully.", "success", m.Author)
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, msg)
 	if err != nil {
 		return err
@@ -35,12 +35,12 @@ func (f *Features) handleSetStatus(s *discordgo.Session, m *discordgo.MessageCre
 	return nil
 }
 
-func (f *Features) handleDisconnect(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	if !f.Permissions.CheckAdminRole(m.Member) {
+func (c *Commands) handleDisconnect(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	if !c.Permissions.CheckAdminRole(m.Member) {
 		return errors.New("I'm sorry Dave, I'm afraid I can't do that.")
 	}
 
-	msg := f.CreateDefinedEmbed("Disconnect", "Attempting Disconnect...", "", m.Author)
+	msg := c.CreateDefinedEmbed("Disconnect", "Attempting Disconnect...", "", m.Author)
 	_, err := s.ChannelMessageSendEmbed(m.ChannelID, msg)
 	if err != nil {
 		return err
@@ -56,8 +56,8 @@ func (f *Features) handleDisconnect(s *discordgo.Session, m *discordgo.MessageCr
 	return nil
 }
 
-func (f *Features) handleReconnect(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	if !f.Permissions.CheckAdminRole(m.Member) {
+func (c *Commands) handleReconnect(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	if !c.Permissions.CheckAdminRole(m.Member) {
 		return errors.New("You do not have permissions to use that command.")
 	}
 
@@ -73,7 +73,7 @@ func (f *Features) handleReconnect(s *discordgo.Session, m *discordgo.MessageCre
 		log.Fatal(err)
 	}
 
-	msg := f.CreateDefinedEmbed("Reconnect", "Reconnected Successfully.\nTime: `"+time.Since(t).String()+"`.", "success", m.Author)
+	msg := c.CreateDefinedEmbed("Reconnect", "Reconnected Successfully.\nTime: `"+time.Since(t).String()+"`.", "success", m.Author)
 	_, err = s.ChannelMessageSendEmbed(m.ChannelID, msg)
 	if err != nil {
 		return err
