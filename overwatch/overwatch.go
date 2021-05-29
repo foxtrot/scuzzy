@@ -1,9 +1,11 @@
 package overwatch
 
 import (
-	"github.com/bwmarrin/discordgo"
 	"log"
 	"time"
+
+	"github.com/bwmarrin/discordgo"
+	"github.com/foxtrot/scuzzy/commands"
 )
 
 type UserMessageStat struct {
@@ -16,9 +18,17 @@ type UserMessageStat struct {
 	Kicks                int
 }
 
+type ServerStat struct {
+	JoinsLastTenMins       uint64
+	SlowmodeFlood          bool
+	SlowmodeFloodStartTime time.Time
+}
+
 type Overwatch struct {
 	TotalMessages uint64
 	UserMessages  map[string]*UserMessageStat
+	ServerStats   ServerStat
+	Commands      *commands.Commands
 }
 
 func (o *Overwatch) ProcessMessage(s *discordgo.Session, m interface{}) {
@@ -30,6 +40,10 @@ func (o *Overwatch) ProcessMessage(s *discordgo.Session, m interface{}) {
 		}
 		break
 	case *discordgo.GuildMemberAdd:
+		err := o.handleServerJoin(s, m.(*discordgo.GuildMemberAdd))
+		if err != nil {
+			log.Printf("[!] Error handling Overwatch server join: %s\n", err.Error())
+		}
 		break
 	}
 }
@@ -53,6 +67,19 @@ func (o *Overwatch) handleUserStat(s *discordgo.Session, m *discordgo.MessageCre
 	return nil
 }
 
+func (o *Overwatch) handleServerJoin(s *discordgo.Session, m *discordgo.GuildMemberAdd) error {
+	o.ServerStats.JoinsLastTenMins++
+
+	// json value
+	if o.ServerStats.JoinsLastTenMins > 10 {
+		log.Printf("[*] User flood detected, enforcing slow mode on all channels for 30 minutes\n")
+		o.ServerStats.SlowmodeFlood = true
+		o.ServerStats.SlowmodeFloodStartTime = time.Now()
+		o.ServerStats.JoinsLastTenMins = 0
+	}
+	return nil
+}
+
 // this is fucking amazing code
 func (o *Overwatch) Run() {
 	// State of the art anti-spam loop
@@ -68,10 +95,22 @@ func (o *Overwatch) Run() {
 						log.Printf("[*] User %s (%s) was banned due to previous spam-related kicks", user.Username, user.UserID)
 					} else {
 						user.Kicks++
-						// kick that sucker
+						// kick user
 						user.MessagesLastTenSecs = 0
 						log.Printf("[*] User %s (%s) has triggered the message threshold.", user.Username, user.UserID)
 					}
+				}
+			}
+		}
+	}()
+
+	// State of the art anti-join-flood loop
+	go func() {
+		for range time.Tick(30 * time.Second) {
+			if o.ServerStats.SlowmodeFlood {
+				// json value
+				if time.Since(o.ServerStats.SlowmodeFloodStartTime) > time.Minute*30 {
+					log.Printf("[*] Removing Slowmode for all channels after flood\n")
 				}
 			}
 		}
