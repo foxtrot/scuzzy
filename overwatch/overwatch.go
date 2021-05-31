@@ -28,6 +28,7 @@ type ServerStat struct {
 
 type Overwatch struct {
 	TotalMessages uint64
+	TotalJoins    uint64
 	UserMessages  map[string]*UserMessageStat
 	ServerStats   ServerStat
 	Commands      *commands.Commands
@@ -37,6 +38,8 @@ type Overwatch struct {
 func (o *Overwatch) ProcessMessage(s *discordgo.Session, m interface{}) {
 	switch m.(type) {
 	case *discordgo.MessageCreate:
+		o.TotalMessages++
+
 		err := o.handleUserStat(s, m.(*discordgo.MessageCreate))
 		if err != nil {
 			log.Printf("[!] Error handling Overwatch user stat: %s\n", err.Error())
@@ -48,6 +51,8 @@ func (o *Overwatch) ProcessMessage(s *discordgo.Session, m interface{}) {
 		}
 		break
 	case *discordgo.GuildMemberAdd:
+		o.TotalJoins++
+
 		err := o.handleServerJoin(s, m.(*discordgo.GuildMemberAdd))
 		if err != nil {
 			log.Printf("[!] Error handling Overwatch server join: %s\n", err.Error())

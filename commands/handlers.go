@@ -67,6 +67,8 @@ func (c *Commands) RegisterHandlers() {
 	c.RegisterCommand("saveconfig", "Save Configuration to Disk", true, c.handleSaveConfig)
 	c.RegisterCommand("reloadconfig", "Reload Configuration", true, c.handleReloadConfig)
 	c.RegisterCommand("addrole", "Add a joinable role", true, c.handleAddCustomRole)
+	c.RegisterCommand("enforcement", "Configure Overwatch enforcement", true, c.handleSetOverwatchEnforcement)
+	c.RegisterCommand("wordfilter", "Configure Overwatch word filtering", true, c.handleSetWordFilter)
 }
 
 func (c *Commands) ProcessCommand(s *discordgo.Session, m *discordgo.MessageCreate) error {
