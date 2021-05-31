@@ -6,20 +6,22 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/foxtrot/scuzzy/commands"
+	"github.com/foxtrot/scuzzy/models"
 )
 
 type UserMessageStat struct {
 	UserID               string
 	Username             string
-	MessagesLastDay      uint64
-	MessagesLastHour     uint64
-	MessagesLastFiveMins uint64
-	MessagesLastTenSecs  uint64
+	MessagesLastDay      int
+	MessagesLastHour     int
+	MessagesLastFiveMins int
+	MessagesLastTenSecs  int
+	Warnings             int
 	Kicks                int
 }
 
 type ServerStat struct {
-	JoinsLastTenMins       uint64
+	JoinsLastTenMins       int
 	SlowmodeFlood          bool
 	SlowmodeFloodStartTime time.Time
 }
@@ -29,6 +31,7 @@ type Overwatch struct {
 	UserMessages  map[string]*UserMessageStat
 	ServerStats   ServerStat
 	Commands      *commands.Commands
+	Config        *models.Configuration
 }
 
 func (o *Overwatch) ProcessMessage(s *discordgo.Session, m interface{}) {
@@ -54,6 +57,9 @@ func (o *Overwatch) ProcessMessage(s *discordgo.Session, m interface{}) {
 }
 
 func (o *Overwatch) filterUserMessage(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	if o.Config.FilterLanguage {
+		// load regex from config?
+	}
 	return nil
 }
 
@@ -98,23 +104,26 @@ func (o *Overwatch) handleServerJoin(s *discordgo.Session, m *discordgo.GuildMem
 
 // this is fucking amazing code
 func (o *Overwatch) Run() {
-	// this shit needs a go channel
 	// State of the art anti-spam loop
 	go func() {
 		for range time.Tick(5 * time.Second) {
 			for _, user := range o.UserMessages {
-				// load the threshold from the config file, dipshit
-				if user.MessagesLastTenSecs > 20 {
+				if user.MessagesLastTenSecs > o.Config.UserMessageThreshold {
 					// Set slow mode, kick user? add kick count?
-					if user.Kicks > 2 {
-						// ban that sucker
-						delete(o.UserMessages, user.UserID)
-						log.Printf("[*] User %s (%s) was banned due to previous spam-related kicks", user.Username, user.UserID)
+					if user.Warnings > o.Config.MaxUserWarnings {
+						if user.Kicks > o.Config.MaxUserKicks {
+							// ban that sucker
+							delete(o.UserMessages, user.UserID)
+							log.Printf("[*] User %s (%s) was banned due to previous spam-related kicks\n", user.Username, user.UserID)
+						} else {
+							user.Kicks++
+							// kick user
+							user.MessagesLastTenSecs = 0
+							log.Printf("[*] User %s (%s) has been kicked for message spam\n", user.Username, user.UserID)
+						}
 					} else {
-						user.Kicks++
-						// kick user
-						user.MessagesLastTenSecs = 0
-						log.Printf("[*] User %s (%s) has triggered the message threshold.", user.Username, user.UserID)
+						user.Warnings++
+						log.Printf("[*] User %s (%s) was warned for spamming\n", user.Username, user.UserID)
 					}
 				}
 			}
