@@ -40,4 +40,11 @@ type Configuration struct {
 	LoggingChannel string `json:"logging_channel"`
 
 	ConfigPath string
+
+	FilterLanguage       bool
+	JoinFloodThreshold   int
+	UserMessageThreshold int
+	MaxUserWarnings      int
+	MaxUserKicks         int
+	EnforceMode          bool
 }
