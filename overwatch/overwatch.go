@@ -92,7 +92,7 @@ func (o *Overwatch) handleServerJoin(s *discordgo.Session, m *discordgo.GuildMem
 	o.ServerStats.JoinsLastTenMins++
 
 	// json value
-	if o.ServerStats.JoinsLastTenMins > 10 {
+	if o.ServerStats.JoinsLastTenMins > o.Config.JoinFloodThreshold {
 		log.Printf("[*] User flood detected, enforcing slow mode on all channels for 30 minutes\n")
 		// Set slow mode on all channels
 		o.ServerStats.SlowmodeFlood = true
