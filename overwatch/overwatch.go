@@ -38,6 +38,11 @@ func (o *Overwatch) ProcessMessage(s *discordgo.Session, m interface{}) {
 		if err != nil {
 			log.Printf("[!] Error handling Overwatch user stat: %s\n", err.Error())
 		}
+
+		err = o.filterUserMessage(s, m.(*discordgo.MessageCreate))
+		if err != nil {
+			log.Printf("[!] Error handling Overwatch user message filter: %s\n", err.Error())
+		}
 		break
 	case *discordgo.GuildMemberAdd:
 		err := o.handleServerJoin(s, m.(*discordgo.GuildMemberAdd))
@@ -46,6 +51,10 @@ func (o *Overwatch) ProcessMessage(s *discordgo.Session, m interface{}) {
 		}
 		break
 	}
+}
+
+func (o *Overwatch) filterUserMessage(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	return nil
 }
 
 func (o *Overwatch) handleUserStat(s *discordgo.Session, m *discordgo.MessageCreate) error {
@@ -95,7 +104,7 @@ func (o *Overwatch) Run() {
 		for range time.Tick(5 * time.Second) {
 			for _, user := range o.UserMessages {
 				// load the threshold from the config file, dipshit
-				if user.MessagesLastTenSecs > 10 {
+				if user.MessagesLastTenSecs > 20 {
 					// Set slow mode, kick user? add kick count?
 					if user.Kicks > 2 {
 						// ban that sucker
