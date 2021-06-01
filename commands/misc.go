@@ -17,10 +17,6 @@ import (
 )
 
 func (c *Commands) handleSetConfig(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	if !c.Permissions.CheckAdminRole(m.Member) {
-		return errors.New("You do not have permissions to use that command.")
-	}
-
 	configArgs := strings.Split(m.Content, " ")
 
 	if len(configArgs) != 3 {
@@ -83,10 +79,6 @@ func (c *Commands) handleSetConfig(s *discordgo.Session, m *discordgo.MessageCre
 
 func (c *Commands) handleGetConfig(s *discordgo.Session, m *discordgo.MessageCreate) error {
 	//TODO: Handle printing of slices (check the Type, loop accordingly)
-
-	if !c.Permissions.CheckAdminRole(m.Member) {
-		return errors.New("You do not have permissions to use that command.")
-	}
 
 	configArgs := strings.Split(m.Content, " ")
 	configKey := "all"
@@ -153,10 +145,6 @@ func (c *Commands) handleGetConfig(s *discordgo.Session, m *discordgo.MessageCre
 }
 
 func (c *Commands) handleReloadConfig(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	if !c.Permissions.CheckAdminRole(m.Member) {
-		return errors.New("You do not have permissions to use this command.")
-	}
-
 	fBuf, err := ioutil.ReadFile(c.Config.ConfigPath)
 	if err != nil {
 		return err
@@ -182,10 +170,6 @@ func (c *Commands) handleReloadConfig(s *discordgo.Session, m *discordgo.Message
 }
 
 func (c *Commands) handleSaveConfig(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	if !c.Permissions.CheckAdminRole(m.Member) {
-		return errors.New("You do not have permissions to use this command.")
-	}
-
 	j, err := json.Marshal(c.Config)
 	if err != nil {
 		return err
@@ -223,14 +207,10 @@ func (c *Commands) handlePing(s *discordgo.Session, m *discordgo.MessageCreate) 
 	var r *discordgo.Message
 	var err error
 
-	if !c.Permissions.CheckAdminRole(m.Member) {
-		return errors.New("You do not have permissions to use that command.")
-	} else {
-		msg := c.CreateDefinedEmbed("Ping", "Pong", "success", m.Author)
-		r, err = s.ChannelMessageSendEmbed(m.ChannelID, msg)
-		if err != nil {
-			return err
-		}
+	msg := c.CreateDefinedEmbed("Ping", "Pong", "success", m.Author)
+	r, err = s.ChannelMessageSendEmbed(m.ChannelID, msg)
+	if err != nil {
+		return err
 	}
 
 	time.Sleep(5 * time.Second)
@@ -338,10 +318,6 @@ func (c *Commands) handleHelp(s *discordgo.Session, m *discordgo.MessageCreate) 
 }
 
 func (c *Commands) handleRules(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	if !c.Permissions.CheckAdminRole(m.Member) {
-		return errors.New("You do not have permissions to use that command.")
-	}
-
 	msg := c.Config.RulesText
 	embedTitle := "Rules (" + c.Config.GuildName + ")"
 	embed := c.CreateDefinedEmbed(embedTitle, msg, "success", m.Author)

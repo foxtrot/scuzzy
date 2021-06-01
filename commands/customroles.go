@@ -120,10 +120,6 @@ func (c *Commands) handleLeaveCustomRole(s *discordgo.Session, m *discordgo.Mess
 func (c *Commands) handleAddCustomRole(s *discordgo.Session, m *discordgo.MessageCreate) error {
 	var err error
 
-	if !c.Permissions.CheckAdminRole(m.Member) {
-		return errors.New("You do not have permissions to use that command.")
-	}
-
 	userInput := strings.Split(m.Content, " ")
 	if len(userInput) < 3 {
 		return errors.New("Expected Arguments: short_name role_id")

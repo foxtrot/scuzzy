@@ -9,10 +9,6 @@ import (
 )
 
 func (c *Commands) handleSetSlowmode(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	if !c.Permissions.CheckAdminRole(m.Member) {
-		return errors.New("You do not have permissions to use that command.")
-	}
-
 	slowmodeSplit := strings.Split(m.Content, " ")
 	if len(slowmodeSplit) < 2 {
 		return errors.New("You must supply at least an amount of time")
@@ -56,10 +52,6 @@ func (c *Commands) handleSetSlowmode(s *discordgo.Session, m *discordgo.MessageC
 }
 
 func (c *Commands) handleUnsetSlowmode(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	if !c.Permissions.CheckAdminRole(m.Member) {
-		return errors.New("You do not have permissions to use that command.")
-	}
-
 	slowmodeSplit := strings.Split(m.Content, " ")
 
 	if len(slowmodeSplit) == 2 {
@@ -94,10 +86,6 @@ func (c *Commands) handleUnsetSlowmode(s *discordgo.Session, m *discordgo.Messag
 }
 
 func (c *Commands) handlePurgeChannel(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	if !c.Permissions.CheckAdminRole(m.Member) {
-		return errors.New("You do not have permissions to use that command.")
-	}
-
 	purgeSplit := strings.SplitN(m.Content, " ", 2)
 	if len(purgeSplit) < 2 {
 		return errors.New("No message count supplied")
@@ -194,10 +182,6 @@ func (c *Commands) handleKickUser(s *discordgo.Session, m *discordgo.MessageCrea
 }
 
 func (c *Commands) handleBanUser(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	if !c.Permissions.CheckAdminRole(m.Member) {
-		return errors.New("You do not have permissions to use this command.")
-	}
-
 	var (
 		mHandle   *discordgo.User
 		banReason string
@@ -241,10 +225,6 @@ func (c *Commands) handleBanUser(s *discordgo.Session, m *discordgo.MessageCreat
 }
 
 func (c *Commands) handleIgnoreUser(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	if !c.Permissions.CheckAdminRole(m.Member) {
-		return errors.New("You do not have permissions to use this command.")
-	}
-
 	ignArgs := strings.Split(m.Content, " ")
 	if len(ignArgs) < 2 {
 		return errors.New("You did not specify a user.")
@@ -272,10 +252,6 @@ func (c *Commands) handleIgnoreUser(s *discordgo.Session, m *discordgo.MessageCr
 }
 
 func (c *Commands) handleUnIgnoreUser(s *discordgo.Session, m *discordgo.MessageCreate) error {
-	if !c.Permissions.CheckAdminRole(m.Member) {
-		return errors.New("You do not have permissions to use this command.")
-	}
-
 	ignArgs := strings.Split(m.Content, " ")
 	if len(ignArgs) < 2 {
 		return errors.New("You did not specify a user.")
