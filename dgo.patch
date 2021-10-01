@@ -1,6 +1,5 @@
-diff -Nurx '.*' discord.go/structs.go discordgo/structs.go
---- discord.go/structs.go	2021-05-28 16:13:27.712814231 +0000
-+++ discordgo/structs.go	2021-05-28 16:29:42.482943595 +0000
+--- structs.go.old	2021-10-01 14:56:44.944208960 +0000
++++ structs.go	2021-10-01 14:56:41.660150490 +0000
 @@ -310,12 +310,12 @@
  	Name                 string                 `json:"name,omitempty"`
  	Topic                string                 `json:"topic,omitempty"`
@@ -12,7 +11,7 @@ diff -Nurx '.*' discord.go/structs.go discordgo/structs.go
  	PermissionOverwrites []*PermissionOverwrite `json:"permission_overwrites,omitempty"`
  	ParentID             string                 `json:"parent_id,omitempty"`
 -	RateLimitPerUser     int                    `json:"rate_limit_per_user,omitempty"`
-+	RateLimitPerUser     int                    `json:"rate_limit_per_user"`
++	RateLimitPerUser     *int                   `json:"rate_limit_per_user,omitempty"`
  }
  
  // A ChannelFollow holds data returned after following a news channel
