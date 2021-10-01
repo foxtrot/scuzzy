@@ -30,14 +30,23 @@ func (c *Commands) handleSetSlowmode(s *discordgo.Session, m *discordgo.MessageC
 			}
 
 			for _, channel := range channels {
+				currPos := channel.Position
 				s.ChannelEditComplex(channel.ID, &discordgo.ChannelEdit{
-					RateLimitPerUser: slowModeTime,
+					Position:         currPos,
+					RateLimitPerUser: &slowModeTime,
 				})
 			}
 		}
 	} else {
+		currChan, err := s.Channel(m.ChannelID)
+		if err != nil {
+			return err
+		}
+
+		currPos := currChan.Position
 		_, err = s.ChannelEditComplex(m.ChannelID, &discordgo.ChannelEdit{
-			RateLimitPerUser: slowModeTime,
+			Position:         currPos,
+			RateLimitPerUser: &slowModeTime,
 		})
 		if err != nil {
 			return err
@@ -56,6 +65,8 @@ func (c *Commands) handleSetSlowmode(s *discordgo.Session, m *discordgo.MessageC
 func (c *Commands) handleUnsetSlowmode(s *discordgo.Session, m *discordgo.MessageCreate) error {
 	slowmodeSplit := strings.Split(m.Content, " ")
 
+	secs := 0
+
 	if len(slowmodeSplit) == 2 {
 		if slowmodeSplit[1] == "all" {
 			channels, err := s.GuildChannels(c.Config.GuildID)
@@ -64,14 +75,23 @@ func (c *Commands) handleUnsetSlowmode(s *discordgo.Session, m *discordgo.Messag
 			}
 
 			for _, channel := range channels {
+				currPos := channel.Position
 				s.ChannelEditComplex(channel.ID, &discordgo.ChannelEdit{
-					RateLimitPerUser: 0,
+					Position:         currPos,
+					RateLimitPerUser: &secs,
 				})
 			}
 		}
 	} else {
-		_, err := s.ChannelEditComplex(m.ChannelID, &discordgo.ChannelEdit{
-			RateLimitPerUser: 0,
+		currChan, err := s.Channel(m.ChannelID)
+		if err != nil {
+			return err
+		}
+
+		currPos := currChan.Position
+		_, err = s.ChannelEditComplex(m.ChannelID, &discordgo.ChannelEdit{
+			Position:         currPos,
+			RateLimitPerUser: &secs,
 		})
 		if err != nil {
 			return err
@@ -207,7 +227,7 @@ func (c *Commands) handleBanUser(s *discordgo.Session, m *discordgo.MessageCreat
 		return err
 	}
 
-	err = actions.BanUser(s, c.Config.GuildID, mHandle.ID, banReason, 0)
+	err = actions.BanUser(s, c.Config.GuildID, mHandle.ID, banReason)
 	if err != nil {
 		return err
 	}
