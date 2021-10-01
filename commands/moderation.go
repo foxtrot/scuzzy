@@ -2,10 +2,12 @@ package commands
 
 import (
 	"errors"
-	"github.com/bwmarrin/discordgo"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/bwmarrin/discordgo"
+	"github.com/foxtrot/scuzzy/actions"
 )
 
 func (c *Commands) handleSetSlowmode(s *discordgo.Session, m *discordgo.MessageCreate) error {
@@ -150,7 +152,7 @@ func (c *Commands) handleKickUser(s *discordgo.Session, m *discordgo.MessageCrea
 		return errors.New("You must specify a user to kick.")
 	}
 	if len(args) == 3 {
-		kickReason = args[2]
+		kickReason = strings.Join(args[2:], " ")
 	}
 
 	member := args[1]
@@ -162,7 +164,7 @@ func (c *Commands) handleKickUser(s *discordgo.Session, m *discordgo.MessageCrea
 		return err
 	}
 
-	err = s.GuildMemberDeleteWithReason(c.Config.GuildID, mHandle.User.ID, kickReason)
+	err = actions.KickUser(s, c.Config.GuildID, mHandle.User.ID, kickReason)
 	if err != nil {
 		return err
 	}
@@ -193,7 +195,7 @@ func (c *Commands) handleBanUser(s *discordgo.Session, m *discordgo.MessageCreat
 		return errors.New("You must specify a user to ban.")
 	}
 	if len(args) == 3 {
-		banReason = args[2]
+		banReason = strings.Join(args[2:], " ")
 	}
 
 	member := args[1]
@@ -205,7 +207,7 @@ func (c *Commands) handleBanUser(s *discordgo.Session, m *discordgo.MessageCreat
 		return err
 	}
 
-	err = s.GuildBanCreateWithReason(c.Config.GuildID, mHandle.ID, banReason, 0)
+	err = actions.BanUser(s, c.Config.GuildID, mHandle.ID, banReason, 0)
 	if err != nil {
 		return err
 	}

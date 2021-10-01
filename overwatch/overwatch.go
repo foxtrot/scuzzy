@@ -16,6 +16,7 @@ type UserMessageStat struct {
 	MessagesLastHour     int
 	MessagesLastFiveMins int
 	MessagesLastTenSecs  int
+	LastActiveChannel    string
 	Warnings             int
 	Kicks                int
 }
@@ -89,6 +90,7 @@ func (o *Overwatch) handleUserStat(s *discordgo.Session, m *discordgo.MessageCre
 	user.MessagesLastHour++
 	user.MessagesLastFiveMins++
 	user.MessagesLastTenSecs++
+	user.LastActiveChannel = m.ChannelID
 
 	return nil
 }
