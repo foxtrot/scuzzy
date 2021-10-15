@@ -88,12 +88,12 @@ func (c *Commands) handleGetConfig(s *discordgo.Session, m *discordgo.MessageCre
 
 	msg := ""
 
-	rt := reflect.TypeOf(c.Config)
+	rt := reflect.TypeOf(*c.Config)
 	for i := 0; i < rt.NumField(); i++ {
 		x := rt.Field(i)
 		tagVal := strings.Split(x.Tag.Get("json"), ",")[0]
 		tagName := x.Name
-		prop := reflect.ValueOf(&c.Config).Elem().FieldByName(tagName)
+		prop := reflect.ValueOf(c.Config).Elem().FieldByName(tagName)
 
 		if configKey == "all" {
 			switch prop.Interface().(type) {
