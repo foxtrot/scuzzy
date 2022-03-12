@@ -5,7 +5,6 @@ import (
 	"flag"
 	"github.com/foxtrot/scuzzy/commands"
 	"github.com/foxtrot/scuzzy/models"
-	"github.com/foxtrot/scuzzy/overwatch"
 	"github.com/foxtrot/scuzzy/permissions"
 	"io/ioutil"
 	"log"
@@ -64,6 +63,9 @@ func main() {
 		log.Fatal("[!] Error: " + err.Error())
 	}
 
+    // Enable Reconnect
+    bot.ShouldReconnectOnError = true
+
 	// Enable Message Caching (Last 1024 Events)
 	bot.State.MaxMessageCount = 1024
 	bot.State.TrackChannels = true
@@ -93,17 +95,8 @@ func main() {
 	}
 	c.RegisterHandlers()
 
-	// Setup Overwatch
-	o := overwatch.Overwatch{
-		TotalMessages: 0,
-		UserMessages:  make(map[string]*overwatch.UserMessageStat),
-		Commands:      &c,
-		Config:        &Config,
-	}
-
 	// Add Handlers for Bot
 	bot.AddHandler(c.ProcessMessage)
-	bot.AddHandler(o.ProcessMessage)
 
 	log.Printf("[*] Bot Running.\n")
 
@@ -127,8 +120,6 @@ func main() {
 			}
 		}
 	}()
-
-	o.Run()
 
 	// Catch SIGINT
 	sc := make(chan os.Signal, 1)
