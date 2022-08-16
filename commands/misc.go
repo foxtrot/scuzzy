@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"reflect"
 	"sort"
@@ -690,5 +691,27 @@ func (c *Commands) handleServerInfo(s *discordgo.Session, m *discordgo.MessageCr
 		return err
 	}
 
+	return nil
+}
+func (c *Commands) handleGoogle4U(s *discordgo.Session, m *discordgo.MessageCreate) error {
+	args := strings.Split(m.Content, " ")
+
+	if len(args) < 2 {
+		return errors.New("You did not specify anything to google")
+	}
+
+	input := m.Content[strings.Index(m.Content, " "):len(m.Content)]
+
+	desc := "https://letmegooglethat.com/?q=" + url.QueryEscape(input)
+
+	msg := c.CreateDefinedEmbed("Google", desc, "", m.Author)
+	_, err := s.ChannelMessageSendEmbed(m.ChannelID, msg)
+	if err != nil {
+		return err
+	}
+	err = s.ChannelMessageDelete(m.ChannelID, m.ID)
+	if err != nil {
+		return err
+	}
 	return nil
 }
