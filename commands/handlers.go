@@ -50,6 +50,7 @@ func (c *Commands) RegisterHandlers() {
 	c.RegisterCommand("fetome", "Convert Feet to Meters", false, c.handleFeetToMeters)
 	c.RegisterCommand("cmtoin", "Convert Centimeters to Inches", false, c.handleCentimeterToInch)
 	c.RegisterCommand("intocm", "Convert Inches to Centimeters", false, c.handleInchToCentimeter)
+	c.RegisterCommand("google4u", "Displays a letmegooglethat link", false, c.handleGoogle4U)
 
 	// Admin Commands
 	c.RegisterCommand("ping", "Ping Scuzzy", true, c.handlePing)
